@@ -55,9 +55,14 @@ private slots:
     void positionChanged(qint64 progress);
     void handleTimerTimeout();
     void handleMediaStatusChanged(QMediaPlayer::MediaStatus status);
-    void onSearchTextChanged(const QString &text);
 
-    void on_pushButton_ShowHideList_clicked();
+    void on_pushButton_DaftarLagu_clicked();
+
+    void on_pushButton_KembaliKeLirik_clicked();
+
+    void on_searchLineEdit_textChanged(const QString &arg1);
+
+    void on_listWidget_SearchResult_itemClicked(QListWidgetItem *item);
 
 private:
     Ui::MainWindow *ui;
