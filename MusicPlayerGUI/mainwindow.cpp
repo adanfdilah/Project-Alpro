@@ -66,7 +66,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(MPlayer, &QMediaPlayer::positionChanged, this, &MainWindow::positionChanged);
 
     ui->horizontalSlider_Audio_File_Duration->setRange(0, MPlayer->duration() / 1000);
-    connect(ui->searchLineEdit, &QLineEdit::textChanged, this, &MainWindow::onSearchTextChanged);
+
+    ui->stackedView->setCurrentWidget(ui->page_Lyrics); //Default menampilkan lirik di awal
+    ui->pushButton_Repeat->setIcon(QIcon(":/new/icon/repeat.svg"));
+    ui->pushButton_Shuffle->setIcon(QIcon(":/new/icon/shuffle.svg"));
 
 }
 
@@ -265,39 +268,36 @@ void MainWindow::on_setTimerButton_clicked()
 
 void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
 {
+    int index = ui->listWidget->row(item);
+    if (index >= 0 && index < daftarLagu.size()) {
+        QString path = daftarLagu[index];
+        MPlayer->setSource(QUrl::fromLocalFile(path));
+        MPlayer->play();
+
+        QFileInfo fileInfo(path);
+        ui->label_File_Name->setText(fileInfo.fileName());
+    }
+}
+
+void MainWindow::on_listWidget_SearchResult_itemClicked(QListWidgetItem *item)
+{
     QString fileName = item->text();
     QString path;
 
-    // Cari path dari hasil pencarian terlebih dahulu
-    for (const QString &p : hasilPencarian)
-    {
-        if (QFileInfo(p).fileName() == fileName)
-        {
+    for (const QString &p : hasilPencarian) {
+        if (QFileInfo(p).fileName() == fileName) {
             path = p;
             break;
         }
     }
 
-    // Jika tidak ada hasil pencarian, fallback ke daftarLagu
-    if (path.isEmpty())
-    {
-        for (const QString &p : daftarLagu)
-        {
-            if (QFileInfo(p).fileName() == fileName)
-            {
-                path = p;
-                break;
-            }
-        }
-    }
-
-    if (!path.isEmpty())
-    {
+    if (!path.isEmpty()) {
         MPlayer->setSource(QUrl::fromLocalFile(path));
         MPlayer->play();
         ui->label_File_Name->setText(fileName);
     }
 }
+
 
 
 
@@ -395,36 +395,30 @@ void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status)
     }
 }
 
-void MainWindow::onSearchTextChanged(const QString &text)
+
+void MainWindow::on_searchLineEdit_textChanged(const QString &query)
 {
-    ui->listWidget->clear();
-
-    for (const QString &path : daftarLagu)
-    {
-        QFileInfo info(path);
-        QString fileName = info.fileName();
-
-        if (fileName.contains(text, Qt::CaseInsensitive))
-        {
-            ui->listWidget->addItem(fileName);
-        }
-    }
-
-    // Simpan hasil pencarian (opsional)
+    ui->listWidget_SearchResult->clear();
     hasilPencarian.clear();
-    for (int i = 0; i < ui->listWidget->count(); ++i)
-    {
-        QString fileName = ui->listWidget->item(i)->text();
-        for (const QString &path : daftarLagu)
-        {
-            if (QFileInfo(path).fileName() == fileName)
-            {
-                hasilPencarian.push_back(path);
-                break;
+
+    if (!query.isEmpty()) {
+        for (const QString &path : daftarLagu) {
+            if (QFileInfo(path).fileName().contains(query, Qt::CaseInsensitive)) {
+                hasilPencarian.append(path);
+                ui->listWidget_SearchResult->addItem(QFileInfo(path).fileName());
             }
         }
+
+        if (!hasilPencarian.isEmpty()) {
+            ui->stackedView->setCurrentWidget(ui->page_Search);  // Tampilkan hasil pencarian
+        } else {
+            ui->stackedView->setCurrentWidget(ui->page_Lyrics);  // Tidak ada hasil, tampilkan lirik
+        }
+    } else {
+        ui->stackedView->setCurrentWidget(ui->page_Lyrics);  // Kosongkan pencarian, kembali ke lirik
     }
 }
+
 
 
 void MainWindow::fetchLyrics(const QString &fullTitle)
@@ -479,19 +473,12 @@ void MainWindow::fetchLyrics(const QString &fullTitle)
     });
 }
 
-void MainWindow::on_pushButton_ShowHideList_clicked()
+void MainWindow::on_pushButton_DaftarLagu_clicked()
 {
-    if (ui->listWidget->isVisible()) {
-        ui->listWidget->hide();
-        // ui->pushButton_ShowHideList->setText("Tampilkan Daftar Lagu");
-    } else {
-        ui->listWidget->show();
-        // ui->pushButton_ShowHideList->setText("Sembunyikan Daftar Lagu");
-    }
+    ui->stackedView->setCurrentWidget(ui->page_DaftarLagu); // Tampilkan daftar lagu utama
 }
 
-
-
-
-
-
+void MainWindow::on_pushButton_KembaliKeLirik_clicked()
+{
+    ui->stackedView->setCurrentWidget(ui->page_Lyrics); // Kembali ke halaman lirik
+}
