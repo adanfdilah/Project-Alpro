@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/new">
+        <file>icon/repeat.svg</file>
+        <file>icon/shuffle.svg</file>
+    </qresource>
+</RCC>
