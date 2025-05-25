@@ -55,6 +55,7 @@ private slots:
     void positionChanged(qint64 progress);
     void handleTimerTimeout();
     void handleMediaStatusChanged(QMediaPlayer::MediaStatus status);
+    void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
 
     void on_pushButton_DaftarLagu_clicked();
 
@@ -80,12 +81,12 @@ private:
     bool isShuffle = false;
     bool isRepeat = false;
     int currentSongIndex = -1;
-    void putarLaguDariIndeks(int index);
     QVector<QString> hasilPencarian; // berisi hasil dari pencarian saat ini
 
     void updateduration(qint64 duration);
     void putarLaguPadaIndeks(int indeks);
     void fetchLyrics(const QString &title);
+    void urutkanDaftarLagu();
 };
 
 #endif // MAINWINDOW_H
