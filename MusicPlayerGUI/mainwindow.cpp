@@ -23,15 +23,11 @@ MainWindow::MainWindow(QWidget *parent)
     audioOutput->setVolume(0.5);
 
     connect(MPlayer, &QMediaPlayer::mediaStatusChanged, this, &MainWindow::handleMediaStatusChanged);
+    connect(MPlayer, &QMediaPlayer::mediaStatusChanged, this, &MainWindow::onMediaStatusChanged);
 
-    networkManager = new QNetworkAccessManager(this);
-    lyricsDisplay = new QTextEdit(this);
-    lyricsDisplay->setReadOnly(true);
-    lyricsDisplay->setGeometry(20, 400, 400, 150);
+    connect(ui->listWidget, &QListWidget::currentRowChanged,
+            this, &MainWindow::putarLaguPadaIndeks);
 
-
-    // Koneksi list widget item klik
-    connect(ui->listWidget, &QListWidget::itemClicked, this, &MainWindow::on_listWidget_itemClicked);
 
     stopTimer = new QTimer(this);
     stopTimer->setSingleShot(true);
@@ -49,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_Shuffle->setIcon(QIcon(":/new/icon/shuffle.svg"));
     ui->pushButton_Repeat->setIcon(QIcon(":/new/icon/repeat.svg"));
 
-
+    networkManager = new QNetworkAccessManager(this);
     ui->lyricsDisplay->setReadOnly(true);
     ui->lyricsDisplay->setFrameShape(QFrame::NoFrame);
     ui->lyricsDisplay->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -139,22 +135,25 @@ void MainWindow::on_actionOpen_Audio_File_triggered()
     if (fileNames.isEmpty())
         return;
 
-    daftarLagu = fileNames; // <- simpan ke anggota class untuk referensi nanti
+    bool isFirstAddition = daftarLagu.isEmpty(); // Cek apakah ini penambahan pertama
 
-    ui->listWidget->clear(); // kosongkan list sebelumnya
-    for (const QString &file : daftarLagu) {
-        ui->listWidget->addItem(QFileInfo(file).fileName());
+    // Tambahkan lagu-lagu baru (hindari duplikasi)
+    for (const QString &file : fileNames) {
+        if (!daftarLagu.contains(file)) {
+            daftarLagu << file;
+        }
     }
 
-    // Set lagu pertama sebagai default dan tampilkan namanya
-    MPlayer->setSource(QUrl::fromLocalFile(daftarLagu[0]));
-    QFileInfo fileInfo(daftarLagu[0]);
-    ui->label_File_Name->setText(fileInfo.fileName());
+    // Urutkan dan tampilkan ulang daftar
+    urutkanDaftarLagu();
 
-    putarLaguPadaIndeks(0);
+    // Mainkan lagu terakhir yang ditambahkan
+    QString last = fileNames.last();
+    int indeks = daftarLagu.indexOf(last);
+    if (indeks != -1) {
+        putarLaguPadaIndeks(indeks);
+    }
 }
-
-
 
 void MainWindow::on_pushButton_Play_clicked()
 {
@@ -186,24 +185,36 @@ void MainWindow::on_nextButton_clicked()
 {
     if (daftarLagu.isEmpty()) return;
 
-    currentSongIndex++;
-    if (currentSongIndex >= daftarLagu.size())
-        currentSongIndex = 0; // kembali ke awal
+    int nextIndex;
 
-    putarLaguDariIndeks(currentSongIndex);
+    if (isShuffle && daftarLagu.size() > 1) {
+        do {
+            nextIndex = QRandomGenerator::global()->bounded(daftarLagu.size());
+        } while (nextIndex == indeksLaguSaatIni); // Hindari pengulangan lagu sama
+    } else {
+        nextIndex = (indeksLaguSaatIni + 1) % daftarLagu.size();
+    }
+
+    putarLaguPadaIndeks(nextIndex);
 }
+
 
 void MainWindow::on_previousButton_clicked()
 {
     if (daftarLagu.isEmpty()) return;
 
-    currentSongIndex--;
-    if (currentSongIndex < 0)
-        currentSongIndex = daftarLagu.size() - 1; // ke lagu terakhir
+    int prevIndex;
 
-    putarLaguDariIndeks(currentSongIndex);
+    if (isShuffle && daftarLagu.size() > 1) {
+        do {
+            prevIndex = QRandomGenerator::global()->bounded(daftarLagu.size());
+        } while (prevIndex == indeksLaguSaatIni);
+    } else {
+        prevIndex = (indeksLaguSaatIni - 1 + daftarLagu.size()) % daftarLagu.size();
+    }
+
+    putarLaguPadaIndeks(prevIndex);
 }
-
 
 
 void MainWindow::on_horizontalSlider_Audio_File_Duration_valueChanged(int value)
@@ -217,6 +228,56 @@ void MainWindow::on_horizontalSlider_Audio_Volume_valueChanged(int value)
     audioOutput->setVolume(value / 100.0);
 }
 
+void MainWindow::dropEvent(QDropEvent *event)
+{
+    QList<QUrl> droppedUrls = event->mimeData()->urls();
+    if (droppedUrls.isEmpty())
+        return;
+
+    QStringList laguBaru;
+
+    for (const QUrl &url : droppedUrls) {
+        QString filePath = url.toLocalFile();
+
+        if ((filePath.endsWith(".mp3", Qt::CaseInsensitive) || filePath.endsWith(".wav", Qt::CaseInsensitive))
+            && !daftarLagu.contains(filePath)) {
+
+            daftarLagu.append(filePath);
+            laguBaru.append(filePath);
+        }
+    }
+
+    if (!laguBaru.isEmpty()) {
+        // Urutkan seluruh daftar lagu
+        std::sort(daftarLagu.begin(), daftarLagu.end(), [](const QString &a, const QString &b) {
+            return QFileInfo(a).fileName().toLower() < QFileInfo(b).fileName().toLower();
+        });
+
+        // Refresh tampilan list
+        ui->listWidget->clear();
+        for (const QString &file : daftarLagu) {
+            ui->listWidget->addItem(QFileInfo(file).fileName());
+        }
+
+        // Temukan indeks lagu terakhir yang baru ditambahkan
+        QFileInfo lastFile(laguBaru.last());
+        int indexToPlay = -1;
+        for (int i = 0; i < daftarLagu.size(); ++i) {
+            if (QFileInfo(daftarLagu[i]).fileName() == lastFile.fileName()) {
+                indexToPlay = i;
+                break;
+            }
+        }
+
+        // Putar lagu terakhir ditambahkan
+        if (indexToPlay != -1) {
+            putarLaguPadaIndeks(indexToPlay);
+        }
+
+    } else {
+        QMessageBox::information(this, "Info", "File tidak valid atau sudah ada di daftar.");
+    }
+}
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
@@ -225,24 +286,6 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
     }
 }
 
-void MainWindow::dropEvent(QDropEvent *event)
-{
-    QList<QUrl> droppedUrls = event->mimeData()->urls();
-    if (!droppedUrls.isEmpty()) {
-        QString filePath = droppedUrls.first().toLocalFile();
-
-        // Optional: Cek format
-        if (filePath.endsWith(".mp3") || filePath.endsWith(".wav")) {
-            MPlayer->setSource(QUrl::fromLocalFile(filePath));
-            MPlayer->play();
-
-            QFileInfo info(filePath);
-            ui->label_File_Name->setText(info.fileName());
-        } else {
-            QMessageBox::warning(this, "Format tidak didukung", "Hanya file .mp3 dan .wav yang didukung.");
-        }
-    }
-}
 
 void MainWindow::handleTimerTimeout()
 {
@@ -295,10 +338,13 @@ void MainWindow::on_listWidget_SearchResult_itemClicked(QListWidgetItem *item)
         MPlayer->setSource(QUrl::fromLocalFile(path));
         MPlayer->play();
         ui->label_File_Name->setText(fileName);
+
+        // Ambil nama file tanpa ekstensi lalu panggil fetchLyrics
+        QFileInfo info(path);
+        QString baseName = info.baseName();
+        fetchLyrics(baseName);
     }
 }
-
-
 
 
 void MainWindow::putarLaguPadaIndeks(int indeks)
@@ -316,32 +362,18 @@ void MainWindow::putarLaguPadaIndeks(int indeks)
     if (indeks < 0 || indeks >= daftarLagu.size()) return;
 
     indeksLaguSaatIni = indeks;
-    ui->listWidget->setCurrentRow(indeks);
-    MPlayer->setSource(QUrl::fromLocalFile(daftarLagu[indeks]));
+    QString path = daftarLagu[indeks];
+    MPlayer->setSource(QUrl::fromLocalFile(path));
     MPlayer->play();
 
-    QFileInfo info(daftarLagu[indeks]);
-    QString judulLagu = info.baseName();
+    QFileInfo fileInfo(path);
+    ui->label_File_Name->setText(fileInfo.fileName());
+    ui->listWidget->setCurrentRow(indeks);
+
+    // Ambil dan tampilkan lirik lagu
+    QString judulLagu = fileInfo.baseName();
     fetchLyrics(judulLagu);
 }
-
-void MainWindow::putarLaguDariIndeks(int index)
-{
-    if (index >= 0 && index < daftarLagu.size()) {
-        QString path = daftarLagu[index];
-        MPlayer->setSource(QUrl::fromLocalFile(path));
-        MPlayer->play();
-
-        QFileInfo fileInfo(path);
-        ui->label_File_Name->setText(fileInfo.fileName());
-
-        // Tandai di list widget
-        ui->listWidget->setCurrentRow(index);
-    }
-}
-
-
-
 
 void MainWindow::on_pushButton_Shuffle_toggled(bool checked)
 {
@@ -352,8 +384,6 @@ void MainWindow::on_pushButton_Shuffle_toggled(bool checked)
         ui->pushButton_Shuffle->setStyleSheet(""); // Reset style
     }
 }
-
-
 
 void MainWindow::on_pushButton_Repeat_toggled(bool checked)
 {
@@ -481,4 +511,50 @@ void MainWindow::on_pushButton_DaftarLagu_clicked()
 void MainWindow::on_pushButton_KembaliKeLirik_clicked()
 {
     ui->stackedView->setCurrentWidget(ui->page_Lyrics); // Kembali ke halaman lirik
+}
+
+void MainWindow::urutkanDaftarLagu()
+{
+    QStringList daftarJudul;
+
+    // Ambil semua nama file dari daftarLagu
+    for (const QString &path : daftarLagu) {
+        daftarJudul << QFileInfo(path).fileName();
+    }
+
+    // Urutkan judul secara abjad (case-insensitive)
+    std::sort(daftarJudul.begin(), daftarJudul.end(), [](const QString &a, const QString &b) {
+        return a.toLower() < b.toLower();
+    });
+
+    // Buat ulang daftarLagu berdasarkan urutan judul
+    QStringList daftarBaru;
+    for (const QString &judul : daftarJudul) {
+        for (const QString &path : daftarLagu) {
+            if (QFileInfo(path).fileName() == judul) {
+                if (!daftarBaru.contains(path)) {
+                    daftarBaru << path;
+                    break;
+                }
+            }
+        }
+    }
+
+    daftarLagu = daftarBaru;
+
+    // Tampilkan di listWidget
+    ui->listWidget->clear();
+    for (const QString &path : daftarLagu) {
+        ui->listWidget->addItem(QFileInfo(path).fileName());
+    }
+}
+
+void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
+{
+    if (status == QMediaPlayer::EndOfMedia) {
+        // Lanjut ke lagu berikutnya
+        int nextIndex = indeksLaguSaatIni + 1;
+
+        putarLaguPadaIndeks(nextIndex);
+    }
 }
