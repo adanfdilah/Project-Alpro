@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>491</width>
-    <height>645</height>
+    <height>606</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -109,8 +109,8 @@ border-radius:10px;
      <rect>
       <x>10</x>
       <y>230</y>
-      <width>41</width>
-      <height>41</height>
+      <width>40</width>
+      <height>40</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -361,11 +361,16 @@ QPushButton::Hover
    <widget class="QPushButton" name="setTimerButton">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>270</y>
-      <width>65</width>
+      <x>250</x>
+      <y>280</y>
+      <width>23</width>
       <height>25</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>7</pointsize>
+     </font>
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton
@@ -382,14 +387,14 @@ QPushButton::Hover
 }</string>
     </property>
     <property name="text">
-     <string>Set Timer</string>
+     <string/>
     </property>
    </widget>
    <widget class="QSpinBox" name="timerSpinBox">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>270</y>
+      <x>200</x>
+      <y>280</y>
       <width>51</width>
       <height>25</height>
      </rect>
@@ -570,9 +575,9 @@ QPushButton::Hover
    <widget class="QPushButton" name="pushButton_Shuffle">
     <property name="geometry">
      <rect>
-      <x>360</x>
-      <y>270</y>
-      <width>50</width>
+      <x>380</x>
+      <y>280</y>
+      <width>40</width>
       <height>25</height>
      </rect>
     </property>
@@ -596,9 +601,9 @@ padding:0px;
    <widget class="QPushButton" name="pushButton_Repeat">
     <property name="geometry">
      <rect>
-      <x>420</x>
-      <y>270</y>
-      <width>50</width>
+      <x>430</x>
+      <y>280</y>
+      <width>40</width>
       <height>25</height>
      </rect>
     </property>
@@ -622,10 +627,10 @@ padding:0px;
    <widget class="QLineEdit" name="searchLineEdit">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>310</y>
-      <width>191</width>
-      <height>30</height>
+      <x>19</x>
+      <y>280</y>
+      <width>171</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="autoFillBackground">
@@ -635,10 +640,10 @@ padding:0px;
      <string notr="true">QLineEdit
 {
 border:none;
-border-radius:15px;
+border-radius:10px;
 background-color:rgb(255,255,255);
 color:rgb(15,15,15);
-padding:5px;
+padding:3px;
 }</string>
     </property>
     <property name="placeholderText">
@@ -648,9 +653,9 @@ padding:5px;
    <widget class="QPushButton" name="pushButton_DaftarLagu">
     <property name="geometry">
      <rect>
-      <x>290</x>
-      <y>270</y>
-      <width>60</width>
+      <x>330</x>
+      <y>280</y>
+      <width>40</width>
       <height>25</height>
      </rect>
     </property>
@@ -669,15 +674,15 @@ QPushButton::Hover
 }</string>
     </property>
     <property name="text">
-     <string>Playlist</string>
+     <string/>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_KembaliKeLirik">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>270</y>
-      <width>60</width>
+      <x>280</x>
+      <y>280</y>
+      <width>40</width>
       <height>25</height>
      </rect>
     </property>
@@ -696,14 +701,14 @@ QPushButton::Hover
 }</string>
     </property>
     <property name="text">
-     <string>Lirik</string>
+     <string/>
     </property>
    </widget>
    <widget class="QStackedWidget" name="stackedView">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>350</y>
+      <y>320</y>
       <width>451</width>
       <height>241</height>
      </rect>
@@ -991,7 +996,7 @@ QPushButton::Hover
       <property name="font">
        <font>
         <family>Gadugi</family>
-        <pointsize>11</pointsize>
+        <pointsize>10</pointsize>
        </font>
       </property>
      </widget>
@@ -1136,7 +1141,7 @@ QPushButton::Hover
       <property name="font">
        <font>
         <family>Gadugi</family>
-        <pointsize>11</pointsize>
+        <pointsize>10</pointsize>
        </font>
       </property>
      </widget>
