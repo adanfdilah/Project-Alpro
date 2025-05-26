@@ -70,6 +70,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_Volume->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
     ui->pushButton_Shuffle->setIcon(QIcon(":/new/icon/shuffle.svg"));
     ui->pushButton_Repeat->setIcon(QIcon(":/new/icon/repeat.svg"));
+    ui->pushButton_KembaliKeLirik->setIcon(QIcon(":/new/icon/lyric.svg"));
+    ui->pushButton_DaftarLagu->setIcon(QIcon(":/new/icon/playlist.svg"));
+    ui->setTimerButton->setIcon(QIcon(":/new/icon/timer.svg"));
 
     // Inisialisasi QNetworkAccessManager untuk fetch lirik
     networkManager = new QNetworkAccessManager(this);
