@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>491</width>
+    <width>664</width>
     <height>606</height>
    </rect>
   </property>
@@ -709,7 +709,7 @@ QPushButton::Hover
      <rect>
       <x>20</x>
       <y>320</y>
-      <width>451</width>
+      <width>441</width>
       <height>241</height>
      </rect>
     </property>
@@ -721,10 +721,10 @@ QPushButton::Hover
 }</string>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="page_Lyrics">
-     <widget class="QTextEdit" name="lyricsDisplay">
+     <widget class="ClickableTextEdit" name="lyricsDisplay" native="true">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -848,10 +848,7 @@ QPushButton::Hover
         <pointsize>11</pointsize>
        </font>
       </property>
-      <property name="frameShape">
-       <enum>QFrame::Shape::NoFrame</enum>
-      </property>
-      <property name="readOnly">
+      <property name="readOnly" stdset="0">
        <bool>true</bool>
       </property>
      </widget>
@@ -862,7 +859,7 @@ QPushButton::Hover
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>431</width>
+        <width>421</width>
         <height>231</height>
        </rect>
       </property>
@@ -1147,6 +1144,24 @@ QPushButton::Hover
      </widget>
     </widget>
    </widget>
+   <widget class="QListWidget" name="listWidget_Queue">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>320</y>
+      <width>181</width>
+      <height>241</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QListWidget {
+    color: white;
+    background-color: transparent; /* opsional */
+	border:2px solid rgb(255,255,255)
+}
+</string>
+    </property>
+   </widget>
    <zorder>layoutWidget</zorder>
    <zorder>label_File_Name</zorder>
    <zorder>horizontalSlider_Audio_File_Duration</zorder>
@@ -1162,14 +1177,15 @@ QPushButton::Hover
    <zorder>pushButton_DaftarLagu</zorder>
    <zorder>pushButton_KembaliKeLirik</zorder>
    <zorder>stackedView</zorder>
+   <zorder>listWidget_Queue</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>491</width>
-     <height>23</height>
+     <width>664</width>
+     <height>28</height>
     </rect>
    </property>
    <property name="palette">
@@ -1327,6 +1343,13 @@ QPushButton::Hover
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ClickableTextEdit</class>
+   <extends>QWidget</extends>
+   <header>clickabletextedit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
