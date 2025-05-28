@@ -73,6 +73,8 @@ private slots:
 
     void on_lyricsDisplay_clicked(QMouseEvent *event);
 
+    void updateDaftarLaguSetelahDrag();
+
 private: // Fungsi-fungsi helper dan member variables
     Ui::MainWindow *ui;
 
