@@ -49,6 +49,8 @@ MainWindow::MainWindow(QWidget *parent)
     // Koneksi untuk status media player
     connect(MPlayer, &QMediaPlayer::mediaStatusChanged, this, &MainWindow::handleMediaStatusChanged);
 
+    connect(ui->listWidget_Queue->model(), &QAbstractItemModel::rowsMoved, this, &MainWindow::updateDaftarLaguSetelahDrag);
+
     // Setup timer untuk sleep function
     stopTimer = new QTimer(this);
     stopTimer->setSingleShot(true);
@@ -56,6 +58,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Aktifkan drag and drop
     setAcceptDrops(true);
+
+    ui->listWidget_Queue->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->listWidget_Queue->setDragDropMode(QAbstractItemView::InternalMove);
+    ui->listWidget_Queue->setDefaultDropAction(Qt::MoveAction);
+    ui->listWidget_Queue->setDragEnabled(true);
+    ui->listWidget_Queue->setAcceptDrops(true);
+    ui->listWidget_Queue->setDropIndicatorShown(true);
+
 
     // Setup ikon tombol dan volume slider
     ui->pushButton_Play->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
@@ -1011,4 +1021,32 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     }
     return QMainWindow::eventFilter(obj, event);
 }
+
+void MainWindow::updateDaftarLaguSetelahDrag() {
+    QStringList urutanBaru;
+    for (int i = 0; i < ui->listWidget_Queue->count(); ++i) {
+        QString namaFile = ui->listWidget_Queue->item(i)->text();
+        for (const QString &path : daftarLagu) {
+            if (QFileInfo(path).fileName() == namaFile) {
+                urutanBaru << path;
+                break;
+            }
+        }
+    }
+
+    if (!urutanBaru.isEmpty()) {
+        QString currentPath = daftarLagu[indeksLaguSaatIni];
+        daftarLagu = urutanBaru;
+
+        indeksLaguSaatIni = daftarLagu.indexOf(currentPath);
+        if (indeksLaguSaatIni == -1) {
+            // Lagu saat ini tidak ditemukan di daftar baru
+            // Pilih lagu default, misalnya lagu pertama, atau set ke 0 agar tidak error
+            indeksLaguSaatIni = 0;
+            qWarning() << "Lagu saat ini tidak ditemukan setelah drag, set indeks ke 0";
+        }
+        qDebug() << "Daftar lagu dan indeks lagu saat ini telah diperbarui setelah drag.";
+    }
+}
+
 
