@@ -9,22 +9,24 @@
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
 #include <QFileDialog>
-#include <QMimeData> // Untuk drag and drop
-#include <QDragEnterEvent> // Untuk drag and drop
-#include <QDropEvent> // Untuk drag and drop
-#include <QMessageBox> // Untuk pesan informasi
-#include <QFileInfo> // Untuk informasi file
-#include <QRandomGenerator> // Untuk shuffle
-#include <algorithm> // Untuk std::sort
-#include <QUrl> // Untuk QUrl::fromLocalFile
-#include <QTime> // Untuk format waktu
-#include <QRegularExpression> // Ganti QRegExp dengan QRegularExpression
-#include <QRegularExpressionMatch> // Tambahkan ini juga untuk QRegularExpressionMatch
-#include <QDebug> // Untuk debugging output
+#include <QMimeData>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QMessageBox>
+#include <QFileInfo>
+#include <QRandomGenerator>
+#include <algorithm> // Untuk std::sort (meskipun akan dihapus dari urutkanDaftarLagu()
+#include <QUrl>
+#include <QTime>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
+#include <QDebug>
 #include <QTextBlock>
 #include <QFile>
 #include <QTextCursor>
 #include <QTextDocument>
+// #include <QVBoxLayout> // Dihapus karena ui->listWidget sudah dari Designer
+// #include <QWidget>     // Dihapus karena ui->listWidget sudah dari Designer
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -38,6 +40,29 @@ MainWindow::MainWindow(QWidget *parent)
     MPlayer->setAudioOutput(audioOutput);
     audioOutput->setVolume(0.5);
 
+    // --- BAGIAN INI DIHAPUS KARENA DUPLIKASI QListWidget ---
+    // Kode ini membuat QListWidget baru yang tidak terhubung ke UI Designer Anda.
+    // QWidget *centralWidget = new QWidget(this);
+    // setCentralWidget(centralWidget);
+    // QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget);
+    // QListWidget *playlistWidget = new QListWidget(this);
+    // mainLayout->addWidget(playlistWidget);
+    // centralWidget->setLayout(mainLayout);
+    // --- AKHIR BAGIAN YANG DIHAPUS ---
+
+    // --- PENTING: Pengaturan Drag and Drop untuk ui->listWidget ---
+    // ui->listWidget adalah QListWidget yang Anda definisikan di UI Designer.
+    ui->listWidget->setDragDropMode(QAbstractItemView::InternalMove); // Mengizinkan drag-and-drop di dalam list
+    ui->listWidget->setDragEnabled(true); // Memungkinkan item untuk diseret
+    // ui->listWidget->setDropEnabled(true); // BARIS INI MENYEBABKAN ERROR, DIHAPUS
+    ui->listWidget->setDefaultDropAction(Qt::MoveAction); // Mengindikasikan aksi pemindahan
+
+    // --- PENTING: Koneksi untuk sync daftarLagu saat playlist di-drag-drop di UI ---
+    // Ketika baris dipindahkan di model QListWidget, kita sync daftarLagu internal.
+    // QListWidget menggunakan QAbstractListModel sebagai modelnya.
+    connect(ui->listWidget->model(), &QAbstractItemModel::rowsMoved,
+            this, &MainWindow::syncDaftarLaguWithListWidget);
+
     // Koneksi untuk update lirik (menggunakan lyricsTimer yang sudah ada)
     lyricsTimer = new QTimer(this);
     lyricsTimer->setInterval(100); // Cek tiap 100ms posisi lagu untuk update lirik
@@ -50,16 +75,17 @@ MainWindow::MainWindow(QWidget *parent)
     connect(MPlayer, &QMediaPlayer::mediaStatusChanged, this, &MainWindow::handleMediaStatusChanged);
 
     // Koneksi klik item di listWidget untuk putar lagu
-    connect(ui->listWidget, &QListWidget::currentRowChanged,
-            this, &MainWindow::putarLaguPadaIndeks);
+    // Gunakan itemClicked daripada currentRowChanged untuk trigger putarLaguPadaIndeks
+    connect(ui->listWidget, &QListWidget::itemClicked,
+            this, &MainWindow::on_listWidget_itemClicked);
 
     // Setup timer untuk sleep function
     stopTimer = new QTimer(this);
     stopTimer->setSingleShot(true);
     connect(stopTimer, &QTimer::timeout, this, &MainWindow::handleTimerTimeout);
 
-    // Aktifkan drag and drop
-    setAcceptDrops(true);
+    // Aktifkan drag and drop untuk jendela utama (untuk file eksternal)
+    setAcceptDrops(true); // Ini mengizinkan drop file dari File Explorer ke jendela utama
 
     // Setup ikon tombol dan volume slider
     ui->pushButton_Play->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
@@ -174,15 +200,21 @@ void MainWindow::on_actionOpen_Audio_File_triggered()
     if (fileNames.isEmpty())
         return;
 
-    // Tambahkan lagu-lagu baru (hindari duplikasi)
+    bool newSongsAdded = false;
     for (const QString &file : fileNames) {
-        if (!daftarLagu.contains(file)) {
-            daftarLagu << file;
+        if (!daftarLagu.contains(file)) { // Hindari duplikasi di daftarLagu internal
+            daftarLagu.append(file); // Tambahkan ke daftarLagu internal
+            QListWidgetItem *item = new QListWidgetItem(QFileInfo(file).fileName());
+            item->setData(Qt::UserRole, file); // PENTING: Simpan path lengkap di UserRole
+            ui->listWidget->addItem(item); // Tambahkan ke tampilan UI
+            newSongsAdded = true;
         }
     }
 
-    // Urutkan dan tampilkan ulang daftar
-    urutkanDaftarLagu();
+    if (newSongsAdded) {
+        // TIDAK PERLU urutkanDaftarLagu() lagi di sini jika Anda ingin mempertahankan urutan drag and drop
+        // Lagu baru akan ditambahkan di akhir playlist dan itu urutan yang diinginkan.
+    }
 
     // Putar lagu terakhir yang ditambahkan jika tidak ada lagu yang diputar
     // atau jika pengguna ingin lagu baru langsung diputar
@@ -219,8 +251,6 @@ void MainWindow::on_pushButton_Pause_clicked()
         MPlayer->pause();
     }
 }
-
-
 
 void MainWindow::on_pushButton_Stop_clicked()
 {
@@ -272,7 +302,11 @@ void MainWindow::on_previousButton_clicked()
 
 void MainWindow::on_horizontalSlider_Audio_File_Duration_valueChanged(int value)
 {
-    MPlayer->setPosition(value * 1000);
+    // Hanya set posisi jika slider tidak sedang ditekan oleh pengguna
+    if (!ui->horizontalSlider_Audio_File_Duration->isSliderDown())
+    {
+        MPlayer->setPosition(value * 1000);
+    }
 }
 
 
@@ -281,13 +315,15 @@ void MainWindow::on_horizontalSlider_Audio_Volume_valueChanged(int value)
     audioOutput->setVolume(value / 100.0);
 }
 
+// Fungsi untuk menerima file yang di-drop dari luar aplikasi
 void MainWindow::dropEvent(QDropEvent *event)
 {
     QList<QUrl> droppedUrls = event->mimeData()->urls();
     if (droppedUrls.isEmpty())
         return;
 
-    QStringList laguBaru;
+    bool newSongsAdded = false;
+    QString lastDroppedFilePath; // Untuk menyimpan path dari lagu terakhir yang di-drop
 
     for (const QUrl &url : droppedUrls) {
         QString filePath = url.toLocalFile();
@@ -298,32 +334,33 @@ void MainWindow::dropEvent(QDropEvent *event)
              filePath.endsWith(".flac", Qt::CaseInsensitive))
             && !daftarLagu.contains(filePath))
         {
-            daftarLagu.append(filePath);
-            laguBaru.append(filePath);
+            daftarLagu.append(filePath); // Tambahkan ke daftarLagu internal
+            QListWidgetItem *item = new QListWidgetItem(QFileInfo(filePath).fileName());
+            item->setData(Qt::UserRole, filePath); // PENTING: Simpan path lengkap di UserRole
+            ui->listWidget->addItem(item); // Tambahkan ke tampilan UI
+            newSongsAdded = true;
+            lastDroppedFilePath = filePath;
         }
     }
 
-    if (!laguBaru.isEmpty()) {
-        urutkanDaftarLagu(); // Urutkan dan refresh listWidget
+    if (newSongsAdded) {
+        // TIDAK PERLU urutkanDaftarLagu() di sini untuk drag-and-drop eksternal.
+        // Lagu baru akan ditambahkan di akhir playlist.
 
         // Putar lagu terakhir ditambahkan jika daftar lagu kosong sebelumnya atau tidak ada lagu aktif
-        QFileInfo lastFile(laguBaru.last());
-        int indexToPlay = -1;
-        for (int i = 0; i < daftarLagu.size(); ++i) {
-            if (QFileInfo(daftarLagu[i]).fileName() == lastFile.fileName()) {
-                indexToPlay = i;
-                break;
-            }
-        }
-
+        int indexToPlay = daftarLagu.indexOf(lastDroppedFilePath); // Cari indeksnya di daftarLagu
         if (indexToPlay != -1 && MPlayer->mediaStatus() == QMediaPlayer::NoMedia) {
+            putarLaguPadaIndeks(indexToPlay);
+        } else if (indexToPlay != -1 && !MPlayer->isPlaying()) {
             putarLaguPadaIndeks(indexToPlay);
         }
     } else {
         QMessageBox::information(this, "Info", "Tidak ada file audio valid yang ditambahkan atau file sudah ada di daftar.");
     }
+    event->acceptProposedAction(); // Penting untuk menerima drop event
 }
 
+// Fungsi untuk menandakan bahwa sesuatu diseret ke dalam jendela
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
     if (event->mimeData()->hasUrls()) {
@@ -354,7 +391,6 @@ void MainWindow::handleTimerTimeout()
 }
 
 
-
 void MainWindow::on_setTimerButton_clicked()
 {
     int minutes = ui->timerSpinBox->value(); // Ambil nilai input
@@ -367,11 +403,20 @@ void MainWindow::on_setTimerButton_clicked()
     }
 }
 
+// Slot untuk menangani klik pada item di listWidget
 void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
 {
-    int index = ui->listWidget->row(item);
-    if (index >= 0 && index < daftarLagu.size()) {
-        putarLaguPadaIndeks(index); // Langsung panggil fungsi putar
+    // Mengambil path lengkap dari data item, ini lebih robust
+    QString path = item->data(Qt::UserRole).toString();
+    if (!path.isEmpty()) {
+        int index = daftarLagu.indexOf(path); // Temukan indeks di daftarLagu utama
+        if (index != -1) {
+            putarLaguPadaIndeks(index); // Langsung panggil fungsi putar
+        } else {
+            qDebug() << "Error: Clicked item path not found in daftarLagu:" << path;
+        }
+    } else {
+        qDebug() << "Error: Clicked item has no path in UserRole:" << item->text();
     }
 }
 
@@ -380,7 +425,8 @@ void MainWindow::on_listWidget_SearchResult_itemClicked(QListWidgetItem *item)
     QString fileName = item->text();
     QString path;
 
-    for (const QString &p : hasilPencarian) {
+    // Cari path lengkap dari hasilPencarian berdasarkan nama file
+    for (const QString &p : qAsConst(hasilPencarian)) {
         if (QFileInfo(p).fileName() == fileName) {
             path = p;
             break;
@@ -395,41 +441,47 @@ void MainWindow::on_listWidget_SearchResult_itemClicked(QListWidgetItem *item)
     }
 }
 
-
 void MainWindow::putarLaguPadaIndeks(int indeks)
 {
-    if (daftarLagu.isEmpty()) return;
-
-    if (indeks < 0 || indeks >= daftarLagu.size()) {
-        // Atur kembali ke awal daftar jika melebihi batas (untuk kasus next/prev di akhir/awal)
-        if (indeks >= daftarLagu.size()) {
-            indeks = 0;
-        } else if (indeks < 0) {
-            indeks = daftarLagu.size() - 1;
-        }
+    if (daftarLagu.isEmpty()) {
+        qDebug() << "putarLaguPadaIndeks: daftarLagu is empty.";
+        return;
     }
 
-    // Handle shuffle
+    // Pastikan indeks berada dalam batas yang valid setelah potensi shuffle
+    if (indeks < 0 || indeks >= daftarLagu.size()) {
+        // Ini lebih ke fallback untuk kasus next/previous, shuffle akan handle indeksnya sendiri
+        if (indeks >= daftarLagu.size()) {
+            indeks = 0; // Kembali ke awal
+        } else if (indeks < 0) {
+            indeks = daftarLagu.size() - 1; // Kembali ke akhir
+        }
+        qDebug() << "putarLaguPadaIndeks: Index out of bounds, adjusted to" << indeks;
+    }
+
+    // Handle shuffle (ini akan mengubah 'indeks' jika shuffle aktif)
     if (isShuffle && daftarLagu.size() > 1) {
         int randomIndex;
         do {
             randomIndex = QRandomGenerator::global()->bounded(daftarLagu.size());
         } while (randomIndex == indeksLaguSaatIni); // Hindari pengulangan lagu sama persis
-        indeks = randomIndex;
+        indeks = randomIndex; // Gunakan indeks acak yang baru
+        qDebug() << "Shuffle is ON. Playing random song at index:" << indeks;
     }
 
     indeksLaguSaatIni = indeks;
-    QString path = daftarLagu[indeks];
+    QString path = daftarLagu[indeksLaguSaatIni]; // Ambil path dari daftarLagu internal yang sudah disinkronkan
     MPlayer->setSource(QUrl::fromLocalFile(path));
     MPlayer->play();
 
     QFileInfo fileInfo(path);
     ui->label_File_Name->setText(fileInfo.fileName());
-    ui->listWidget->setCurrentRow(indeks); // Highlight lagu yang sedang diputar di playlist
+    ui->listWidget->setCurrentRow(indeksLaguSaatIni); // Highlight lagu yang sedang diputar di playlist
 
     // Ambil dan tampilkan lirik lagu
     QString judulLagu = fileInfo.baseName();
     fetchLyrics(judulLagu);
+    qDebug() << "Playing song:" << fileInfo.fileName() << "at index:" << indeksLaguSaatIni;
 }
 
 void MainWindow::on_pushButton_Shuffle_toggled(bool checked)
@@ -437,8 +489,10 @@ void MainWindow::on_pushButton_Shuffle_toggled(bool checked)
     isShuffle = checked;
     if (isShuffle) {
         ui->pushButton_Shuffle->setStyleSheet("background-color: #FFA500; color: white;"); // Contoh highlight orange
+        qDebug() << "Shuffle ON";
     } else {
         ui->pushButton_Shuffle->setStyleSheet(""); // Reset style
+        qDebug() << "Shuffle OFF";
     }
 }
 
@@ -448,38 +502,44 @@ void MainWindow::on_pushButton_Repeat_toggled(bool checked)
 
     if (checked) {
         ui->pushButton_Repeat->setStyleSheet("background-color: #00cc66; color: white;");
+        qDebug() << "Repeat ON";
     } else {
         ui->pushButton_Repeat->setStyleSheet("");
+        qDebug() << "Repeat OFF";
     }
 }
 
 void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status)
 {
+    qDebug() << "MediaStatusChanged: " << status;
     if (status == QMediaPlayer::EndOfMedia)
     {
         if (isRepeat) {
-            // Jika repeat aktif, ulangi lagu yang sedang diputar
+            qDebug() << "End of media, Repeat is ON. Replaying current song.";
             MPlayer->setPosition(0);
             MPlayer->play();
         }
         else {
-            // Jika tidak repeat, lanjut ke lagu berikutnya (atau shuffle)
+            qDebug() << "End of media, Repeat is OFF. Moving to next song.";
             int nextIndex = indeksLaguSaatIni + 1;
 
             if (isShuffle && daftarLagu.size() > 1) {
                 do {
                     nextIndex = QRandomGenerator::global()->bounded(daftarLagu.size());
-                } while (nextIndex == indeksLaguSaatIni);
+                } while (nextIndex == indeksLaguSaatIni); // Hindari pengulangan lagu sama
+                qDebug() << "Shuffle active, next random index:" << nextIndex;
             }
 
             if (nextIndex < daftarLagu.size()) {
                 putarLaguPadaIndeks(nextIndex);
             } else {
-                // Jika sudah lagu terakhir, berhenti saja atau kembali ke awal jika ingin playlist loop
+                // Jika sudah lagu terakhir, berhenti saja
+                qDebug() << "End of playlist. Stopping playback.";
                 MPlayer->stop();
                 lyricsTimer->stop(); // Berhenti menampilkan lirik
                 ui->lyricsDisplay->setPlainText("");
                 ui->label_File_Name->setText("Tidak ada lagu diputar");
+                ui->horizontalSlider_Audio_File_Duration->setValue(0);
             }
         }
     }
@@ -487,16 +547,16 @@ void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status)
     // Menggunakan MPlayer->playbackState() untuk mengecek apakah sedang diputar, dijeda, atau berhenti
     if (MPlayer->playbackState() == QMediaPlayer::PlayingState) {
         // Start lirik timer ketika lagu mulai diputar
-        // Ganti syncedLyrics.isEmpty() menjadi syncedLyricsData.isEmpty()
-        if (!lyricsTimer->isActive() && !syncedLyricsData.isEmpty()) { // PERBAIKAN DI SINI
+        if (!lyricsTimer->isActive() && !syncedLyricsData.isEmpty()) {
             lyricsTimer->start();
+            qDebug() << "Lyrics timer started.";
         }
     } else if (MPlayer->playbackState() == QMediaPlayer::StoppedState ||
                MPlayer->playbackState() == QMediaPlayer::PausedState ||
                status == QMediaPlayer::NoMedia) {
         // Stop lirik timer jika media berhenti, dijeda, atau tidak ada
         lyricsTimer->stop();
-        // ui->lyricsDisplay->setPlainText(""); // Jangan bersihkan di sini, biarkan lirik plain text tetap ada
+        qDebug() << "Lyrics timer stopped.";
     }
 }
 
@@ -504,13 +564,13 @@ void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status)
 void MainWindow::on_searchLineEdit_textChanged(const QString &query)
 {
     ui->listWidget_SearchResult->clear();
-    hasilPencarian.clear();
+    hasilPencarian.clear(); // Pastikan ini membersihkan full path, bukan hanya nama file
 
     if (!query.isEmpty()) {
-        for (const QString &path : daftarLagu) {
+        for (const QString &path : qAsConst(daftarLagu)) { // Cari di daftarLagu utama
             if (QFileInfo(path).fileName().contains(query, Qt::CaseInsensitive)) {
-                hasilPencarian.append(path);
-                ui->listWidget_SearchResult->addItem(QFileInfo(path).fileName());
+                hasilPencarian.append(path); // Tambahkan full path ke hasilPencarian
+                ui->listWidget_SearchResult->addItem(QFileInfo(path).fileName()); // Tampilkan nama file
             }
         }
 
@@ -528,8 +588,6 @@ void MainWindow::on_searchLineEdit_textChanged(const QString &query)
         }
     }
 }
-
-
 
 void MainWindow::fetchLyrics(const QString &fullTitle)
 {
@@ -554,7 +612,6 @@ void MainWindow::fetchLyrics(const QString &fullTitle)
         QString lrcContent = lrcFile.readAll();
         lrcFile.close();
         qDebug() << "LRC file found and loaded. Content length:" << lrcContent.length();
-        // Untuk melihat sebagian isi, tapi hati-hati dengan lirik yang sangat panjang
         qDebug() << "First 200 chars of LRC content:" << lrcContent.left(200) << "...";
 
         // Bersihkan lirik lama dan tampilkan pesan loading dari LRC
@@ -647,6 +704,10 @@ void MainWindow::fetchLyrics(const QString &fullTitle)
 void MainWindow::on_pushButton_DaftarLagu_clicked()
 {
     ui->stackedView->setCurrentWidget(ui->page_DaftarLagu); // Tampilkan daftar lagu utama
+    // Opsional: Panggil urutkanDaftarLagu() di sini jika Anda ingin tampilan direfresh
+    // dan urutan tetap konsisten dengan daftarLagu internal setelah manual reorder.
+    // Jika Anda hanya ingin menampilkan urutan yang sudah di-drag-drop, tidak perlu panggil.
+    // urutkanDaftarLagu();
 }
 
 void MainWindow::on_pushButton_KembaliKeLirik_clicked()
@@ -654,19 +715,50 @@ void MainWindow::on_pushButton_KembaliKeLirik_clicked()
     ui->stackedView->setCurrentWidget(ui->page_Lyrics); // Kembali ke halaman lirik
 }
 
+// Fungsi ini sekarang hanya untuk merefresh tampilan ui->listWidget
+// Tidak lagi melakukan pengurutan alfabetis. Urutan dikelola oleh drag and drop UI.
 void MainWindow::urutkanDaftarLagu()
 {
-    // Menggunakan std::sort pada daftarLagu langsung
-    // Dengan lambda untuk membandingkan nama file tanpa path
-    std::sort(daftarLagu.begin(), daftarLagu.end(), [](const QString &a, const QString &b) {
-        return QFileInfo(a).fileName().toLower() < QFileInfo(b).fileName().toLower();
-    });
-
-    // Tampilkan di listWidget
     ui->listWidget->clear();
-    for (const QString &path : daftarLagu) {
-        ui->listWidget->addItem(QFileInfo(path).fileName());
+    for (const QString &path : qAsConst(daftarLagu)) {
+        QListWidgetItem *item = new QListWidgetItem(QFileInfo(path).fileName());
+        item->setData(Qt::UserRole, path); // PENTING: Simpan path lengkap di UserRole
+        ui->listWidget->addItem(item);
     }
+    // Pastikan jika ada lagu yang sedang diputar, itemnya tetap highlight
+    if (indeksLaguSaatIni != -1 && indeksLaguSaatIni < ui->listWidget->count()) {
+        ui->listWidget->setCurrentRow(indeksLaguSaatIni);
+    }
+    qDebug() << "urutkanDaftarLagu() called. ListWidget refreshed based on current daftarLagu.";
+}
+
+// Fungsi baru: Sinkronkan daftarLagu internal dengan urutan visual di ui->listWidget
+void MainWindow::syncDaftarLaguWithListWidget()
+{
+    qDebug() << "syncDaftarLaguWithListWidget() called due to playlist reorder.";
+    QStringList newDaftarLagu;
+    QString currentPlayingPath = MPlayer->source().toLocalFile(); // Path lagu yang sedang diputar
+
+    for (int i = 0; i < ui->listWidget->count(); ++i) {
+        QListWidgetItem *item = ui->listWidget->item(i);
+        QString fullPath = item->data(Qt::UserRole).toString(); // Ambil path lengkap dari UserRole
+        if (!fullPath.isEmpty()) {
+            newDaftarLagu.append(fullPath);
+        } else {
+            qDebug() << "Error: No full path found in UserRole for item:" << item->text();
+        }
+    }
+    daftarLagu = newDaftarLagu; // Perbarui daftarLagu internal
+
+    // Opsional: Periksa dan perbarui indeksLaguSaatIni jika lagu yang sedang diputar pindah posisi
+    if (!currentPlayingPath.isEmpty() && !daftarLagu.isEmpty()) {
+        int newIndex = daftarLagu.indexOf(currentPlayingPath);
+        if (newIndex != -1 && newIndex != indeksLaguSaatIni) {
+            indeksLaguSaatIni = newIndex;
+            qDebug() << "Current playing song's index updated to:" << indeksLaguSaatIni << "after reorder.";
+        }
+    }
+    qDebug() << "DaftarLagu internal updated. New size:" << daftarLagu.size();
 }
 
 // mainwindow.cpp - di dalam loadSyncedLyrics
@@ -719,7 +811,7 @@ void MainWindow::loadSyncedLyrics(const QString& lyricsContent)
         if (!lyricTextOnly.isEmpty()) {
             // Jika ada timestamps di baris ini, buat entri untuk setiap timestamp
             if (!lineTimestamps.isEmpty()) {
-                for(qint64 ts : lineTimestamps) {
+                for(qint64 ts : qAsConst(lineTimestamps)) {
                     syncedLyricsData.append({ts, lyricTextOnly});
                     qDebug() << "  Added synced lyric data: [" << ts << "] " << lyricTextOnly;
                 }
@@ -756,10 +848,9 @@ void MainWindow::loadSyncedLyrics(const QString& lyricsContent)
 // mainwindow.cpp - di dalam updateLyricDisplay
 void MainWindow::updateLyricDisplay(qint64 currentPosition)
 {
-    qDebug() << "updateLyricDisplay called. Current player position:" << currentPosition << "ms";
 
     if (syncedLyricsData.isEmpty()) {
-        qDebug() << "updateLyricDisplay: syncedLyricsData is empty, returning. No synced lyrics to display.";
+        //qDebug() << "updateLyricDisplay: syncedLyricsData is empty, returning. No synced lyrics to display.";
         return;
     }
 
@@ -778,11 +869,9 @@ void MainWindow::updateLyricDisplay(qint64 currentPosition)
         newLyricIndex = 0; // Jika posisi lagu di awal sekali, anggap baris pertama aktif
     }
 
-    qDebug() << "updateLyricDisplay: Calculated newLyricIndex =" << newLyricIndex << ", currentLyricIndex (previous) =" << currentLyricIndex;
-
     if (newLyricIndex != -1 && newLyricIndex != currentLyricIndex) {
         currentLyricIndex = newLyricIndex;
-        qDebug() << "updateLyricDisplay: Lyric index changed to:" << currentLyricIndex;
+        //qDebug() << "updateLyricDisplay: Lyric index changed to:" << currentLyricIndex;
 
         QStringList displayLines;
         int linesToShowBefore = 2;
@@ -791,7 +880,7 @@ void MainWindow::updateLyricDisplay(qint64 currentPosition)
         int startIndex = qMax(0, currentLyricIndex - linesToShowBefore);
         int endIndex = qMin(syncedLyricsData.size() - 1, currentLyricIndex + linesToShowAfter);
 
-        qDebug() << "updateLyricDisplay: Display range from line" << startIndex << "to" << endIndex;
+        //qDebug() << "updateLyricDisplay: Display range from line" << startIndex << "to" << endIndex;
 
         for (int i = startIndex; i <= endIndex; ++i) {
             const LyricLine &line = syncedLyricsData[i]; // Akses langsung dari QVector
@@ -806,7 +895,7 @@ void MainWindow::updateLyricDisplay(qint64 currentPosition)
 
         QString fullHtmlContent = displayLines.join("<br>");
         ui->lyricsDisplay->setHtml(fullHtmlContent);
-        qDebug() << "updateLyricDisplay: UI updated with new HTML content (first 100 chars):" << fullHtmlContent.left(100) << "...";
+        //qDebug() << "updateLyricDisplay: UI updated with new HTML content (first 100 chars):" << fullHtmlContent.left(100) << "...";
 
         // Logic untuk menggulir ke baris yang aktif
         QTextCursor cursor = ui->lyricsDisplay->textCursor();
@@ -815,22 +904,19 @@ void MainWindow::updateLyricDisplay(qint64 currentPosition)
         ui->lyricsDisplay->setTextCursor(cursor);
 
         QTextDocument *doc = ui->lyricsDisplay->document();
-        // Baris aktif dalam konteks yang ditampilkan, bukan indeks global
-        // Misalnya, jika startIndex = 0 dan currentLyricIndex = 2, maka baris aktif adalah baris ke-2 (indeks 2)
-        // dari teks yang sedang ditampilkan.
         QTextBlock block = doc->findBlockByLineNumber(currentLyricIndex - startIndex);
 
         if (block.isValid()) {
             QTextCursor scrollCursor(block);
             ui->lyricsDisplay->setTextCursor(scrollCursor);
             ui->lyricsDisplay->ensureCursorVisible(); // Gulir agar kursor terlihat
-            qDebug() << "updateLyricDisplay: Scrolled to active lyric block.";
+            //qDebug() << "updateLyricDisplay: Scrolled to active lyric block.";
         } else {
-            qDebug() << "updateLyricDisplay: Block for scrolling is not valid.";
+            //qDebug() << "updateLyricDisplay: Block for scrolling is not valid.";
         }
 
-        qDebug() << "Displaying synced lyric (full lines):" << displayLines.join(" | ");
+        //qDebug() << "Displaying synced lyric (full lines):" << displayLines.join(" | ");
     } else {
-        qDebug() << "updateLyricDisplay: Lyric index did not change or no valid new index. No UI update needed.";
+        //qDebug() << "updateLyricDisplay: Lyric index did not change or no valid new index. No UI update needed.";
     }
 }
