@@ -7,7 +7,7 @@ EqualizerWidget::EqualizerWidget(QWidget *parent)
 {
     animationTimer = new QTimer(this);
     connect(animationTimer, &QTimer::timeout, this, &EqualizerWidget::updateBars);
-    animationTimer->start(100); // update tiap 100ms
+    animationTimer->start(250); // update tiap 250ms
 }
 
 void EqualizerWidget::paintEvent(QPaintEvent *)
