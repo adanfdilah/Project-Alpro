@@ -66,6 +66,19 @@ MainWindow::MainWindow(QWidget *parent)
     ui->listWidget_Queue->setAcceptDrops(true);
     ui->listWidget_Queue->setDropIndicatorShown(true);
 
+    // tool tip keterengan
+    ui->previousButton->setToolTip("Previous");
+    ui->pushButton_Stop->setToolTip("Reset");
+    ui->pushButton_Play->setToolTip("Play");
+    ui->pushButton_Pause->setToolTip("Pause");
+    ui->nextButton->setToolTip("Next");
+    ui->setTimerButton->setToolTip("Sleep Timer");
+    ui->pushButton_KembaliKeLirik->setToolTip("Lirik");
+    ui->pushButton_DaftarLagu->setToolTip("Playlist");
+    ui->pushButton_Shuffle->setToolTip("Shuffle");
+    ui->pushButton_Repeat->setToolTip("Repeat");
+    ui->pushButton_Volume->setToolTip("Sound");
+
 
     // Setup ikon tombol dan volume slider
     ui->pushButton_Play->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
