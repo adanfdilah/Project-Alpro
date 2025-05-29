@@ -70,7 +70,7 @@ private slots:
     void on_pushButton_KembaliKeLirik_clicked();
     void on_searchLineEdit_textChanged(const QString &arg1);
     void on_listWidget_SearchResult_itemClicked(QListWidgetItem *item);
-
+    void on_pushButton_ListWidgetQueue_clicked();
     void on_lyricsDisplay_clicked(QMouseEvent *event);
 
     void updateDaftarLaguSetelahDrag();
