@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>664</width>
+    <width>481</width>
     <height>606</height>
    </rect>
   </property>
@@ -23,7 +23,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>491</width>
+      <width>481</width>
       <height>51</height>
      </rect>
     </property>
@@ -361,7 +361,7 @@ QPushButton::Hover
    <widget class="QPushButton" name="setTimerButton">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>200</x>
       <y>280</y>
       <width>23</width>
       <height>25</height>
@@ -393,7 +393,7 @@ QPushButton::Hover
    <widget class="QSpinBox" name="timerSpinBox">
     <property name="geometry">
      <rect>
-      <x>200</x>
+      <x>150</x>
       <y>280</y>
       <width>51</width>
       <height>25</height>
@@ -629,7 +629,7 @@ padding:0px;
      <rect>
       <x>19</x>
       <y>280</y>
-      <width>171</width>
+      <width>121</width>
       <height>25</height>
      </rect>
     </property>
@@ -721,7 +721,7 @@ QPushButton::Hover
 }</string>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="page_Lyrics">
      <widget class="ClickableTextEdit" name="lyricsDisplay" native="true">
@@ -729,7 +729,7 @@ QPushButton::Hover
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>431</width>
+        <width>421</width>
         <height>221</height>
        </rect>
       </property>
@@ -860,7 +860,7 @@ QPushButton::Hover
         <x>10</x>
         <y>10</y>
         <width>421</width>
-        <height>231</height>
+        <height>221</height>
        </rect>
       </property>
       <property name="palette">
@@ -1004,8 +1004,8 @@ QPushButton::Hover
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>431</width>
-        <height>231</height>
+        <width>421</width>
+        <height>221</height>
        </rect>
       </property>
       <property name="palette">
@@ -1143,23 +1143,51 @@ QPushButton::Hover
       </property>
      </widget>
     </widget>
+    <widget class="QWidget" name="page_ListQueue">
+     <widget class="QListWidget" name="listWidget_Queue">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>421</width>
+        <height>221</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QListWidget {
+    color: white;
+    background-color: transparent; /* opsional */
+}
+</string>
+      </property>
+     </widget>
+    </widget>
    </widget>
-   <widget class="QListWidget" name="listWidget_Queue">
+   <widget class="QPushButton" name="pushButton_ListWidgetQueue">
     <property name="geometry">
      <rect>
-      <x>470</x>
-      <y>320</y>
-      <width>181</width>
-      <height>241</height>
+      <x>230</x>
+      <y>280</y>
+      <width>40</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">QListWidget {
-    color: white;
-    background-color: transparent; /* opsional */
-	border:2px solid rgb(255,255,255)
+     <string notr="true">QPushButton
+{
+border:none;
+border-radius:10px;
+background-color:rgb(255,255,255);
+color:rgb(52,51,64);
+padding:0px;
 }
-</string>
+QPushButton::Hover
+{
+ background-color:rgb(140,140,140);
+}</string>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
    <zorder>layoutWidget</zorder>
@@ -1177,15 +1205,15 @@ QPushButton::Hover
    <zorder>pushButton_DaftarLagu</zorder>
    <zorder>pushButton_KembaliKeLirik</zorder>
    <zorder>stackedView</zorder>
-   <zorder>listWidget_Queue</zorder>
+   <zorder>pushButton_ListWidgetQueue</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>664</width>
-     <height>28</height>
+     <width>481</width>
+     <height>23</height>
     </rect>
    </property>
    <property name="palette">
