@@ -25,6 +25,8 @@
 #include <QFile>
 #include <QTextCursor>
 #include <QTextDocument>
+#include <QToolTip> // untuk styleSheet QToolTip
+#include <QApplication>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -66,6 +68,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->listWidget_Queue->setAcceptDrops(true);
     ui->listWidget_Queue->setDropIndicatorShown(true);
 
+    // styleSheet
+    qApp->setStyleSheet("QToolTip { "
+                            "color: white; "               // Warna teks
+                            "background-color: #323232; "  // Warna latar
+                            "border: 1px solid white; "
+                            "padding: 5px; "
+                            "}");
     // tool tip keterengan
     ui->previousButton->setToolTip("Previous");
     ui->pushButton_Stop->setToolTip("Reset");
@@ -78,6 +87,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_Shuffle->setToolTip("Shuffle");
     ui->pushButton_Repeat->setToolTip("Repeat");
     ui->pushButton_Volume->setToolTip("Sound");
+    ui->pushButton_ListWidgetQueue->setToolTip("Antrian");
 
 
     // Setup ikon tombol dan volume slider
@@ -92,6 +102,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_KembaliKeLirik->setIcon(QIcon(":/new/icon/lyric.svg"));
     ui->pushButton_DaftarLagu->setIcon(QIcon(":/new/icon/playlist.svg"));
     ui->setTimerButton->setIcon(QIcon(":/new/icon/timer.svg"));
+    ui->pushButton_ListWidgetQueue->setIcon(QIcon(":/new/icon/queue.svg"));
 
     // Inisialisasi QNetworkAccessManager untuk fetch lirik
     networkManager = new QNetworkAccessManager(this);
@@ -712,6 +723,11 @@ void MainWindow::on_pushButton_DaftarLagu_clicked()
     ui->stackedView->setCurrentWidget(ui->page_DaftarLagu); // Tampilkan daftar lagu utama
 }
 
+void MainWindow::on_pushButton_ListWidgetQueue_clicked()
+{
+    ui->stackedView->setCurrentWidget(ui->page_ListQueue); // Tampilkan daftar antrian
+}
+
 void MainWindow::on_pushButton_KembaliKeLirik_clicked()
 {
     ui->stackedView->setCurrentWidget(ui->page_Lyrics); // Kembali ke halaman lirik
@@ -1061,5 +1077,4 @@ void MainWindow::updateDaftarLaguSetelahDrag() {
         qDebug() << "Daftar lagu dan indeks lagu saat ini telah diperbarui setelah drag.";
     }
 }
-
 
