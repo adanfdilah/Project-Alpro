@@ -25,6 +25,7 @@
 #include <QFileInfo> // Diperlukan untuk QFileInfo
 #include "clickabletextedit.h"
 #include <QQueue>
+#include <map>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -74,9 +75,13 @@ private slots:
     void on_lyricsDisplay_clicked(QMouseEvent *event);
 
     void updateDaftarLaguSetelahDrag();
+    void on_pushButton_DownloadReport_clicked();
 
 private: // Fungsi-fungsi helper dan member variables
     Ui::MainWindow *ui;
+    std::map<QString, int> playCountMap;
+    std::map<QString, qint64> playDurationMap;                // Judul -> total durasi dimainkan (ms)
+    std::map<QString, QDateTime> lastPlayedMap;               // Judul -> waktu terakhir diputar
 
     QMediaPlayer *MPlayer;
     QAudioOutput *audioOutput;
@@ -84,6 +89,8 @@ private: // Fungsi-fungsi helper dan member variables
     bool userScrollingLyrics = false;        // Untuk mendeteksi scroll manual
     QTimer *resumeAutoScrollTimer = nullptr; // Timer untuk melanjutkan scroll otomatis
     QTimer *stopTimer;   // Timer untuk sleep function
+    QDateTime waktuMulaiDiputar;
+    QString judulLaguDiputar;
 
     QNetworkAccessManager *networkManager; // Untuk mengambil lirik online
 
@@ -127,6 +134,8 @@ private: // Fungsi-fungsi helper dan member variables
     void hapusLaguDariQueue(const QString &path);
     void clearQueue();
     void on_listWidget_Queue_itemClicked(QListWidgetItem *item);
+    void catatDurasiDengar();
+
 };
 
 #endif // MAINWINDOW_H

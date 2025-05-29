@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>481</width>
+    <width>633</width>
     <height>606</height>
    </rect>
   </property>
@@ -1190,6 +1190,19 @@ QPushButton::Hover
      <string/>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton_DownloadReport">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>10</y>
+      <width>131</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Musicplayer wrapped</string>
+    </property>
+   </widget>
    <zorder>layoutWidget</zorder>
    <zorder>label_File_Name</zorder>
    <zorder>horizontalSlider_Audio_File_Duration</zorder>
@@ -1206,14 +1219,15 @@ QPushButton::Hover
    <zorder>pushButton_KembaliKeLirik</zorder>
    <zorder>stackedView</zorder>
    <zorder>pushButton_ListWidgetQueue</zorder>
+   <zorder>pushButton_DownloadReport</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>481</width>
-     <height>23</height>
+     <width>633</width>
+     <height>22</height>
     </rect>
    </property>
    <property name="palette">

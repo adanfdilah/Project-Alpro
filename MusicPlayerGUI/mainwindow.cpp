@@ -285,6 +285,7 @@ void MainWindow::on_pushButton_Pause_clicked()
 
 void MainWindow::on_pushButton_Stop_clicked()
 {
+    catatDurasiDengar();
     MPlayer->stop();
     // Berhenti menampilkan lirik juga
     lyricsTimer->stop();
@@ -478,6 +479,8 @@ void MainWindow::on_listWidget_SearchResult_itemClicked(QListWidgetItem *item)
 
 void MainWindow::putarLaguPadaIndeks(int indeks)
 {
+    catatDurasiDengar(); // Catat durasi lagu sebelumnya sebelum ganti
+
     if (daftarLagu.isEmpty()) return;
 
     if (indeks < 0 || indeks >= daftarLagu.size()) {
@@ -502,6 +505,18 @@ void MainWindow::putarLaguPadaIndeks(int indeks)
     QString path = daftarLagu[indeks];
     MPlayer->setSource(QUrl::fromLocalFile(path));
     MPlayer->play();
+
+    waktuMulaiDiputar = QDateTime::currentDateTime();
+    judulLaguDiputar = QFileInfo(path).fileName();
+
+    // Tambahkan logika play count
+    QString fileName = QFileInfo(path).fileName();
+    qint64 currentDurationMs = MPlayer->duration(); // durasi lagu (ms)
+
+    playCountMap[fileName]++;
+    playDurationMap[fileName] += currentDurationMs;
+    lastPlayedMap[fileName] = QDateTime::currentDateTime();
+
 
     QFileInfo fileInfo(path);
     ui->label_File_Name->setText(fileInfo.fileName());
@@ -537,9 +552,17 @@ void MainWindow::handleMediaStatusChanged(QMediaPlayer::MediaStatus status)
 {
     if (status == QMediaPlayer::EndOfMedia)
     {
+        catatDurasiDengar();
+
         if (isRepeat) {
             MPlayer->setPosition(0);
             MPlayer->play();
+
+            // Tambah statistik play dan reset waktu mulai
+            QString fileName = QFileInfo(daftarLagu[indeksLaguSaatIni]).fileName();
+            playCountMap[fileName]++;
+            waktuMulaiDiputar = QDateTime::currentDateTime();
+            judulLaguDiputar = fileName;
         }
         else {
             if (!laguQueue.isEmpty()) {
@@ -1077,4 +1100,88 @@ void MainWindow::updateDaftarLaguSetelahDrag() {
         qDebug() << "Daftar lagu dan indeks lagu saat ini telah diperbarui setelah drag.";
     }
 }
+
+void MainWindow::on_pushButton_DownloadReport_clicked()
+{
+    if (playCountMap.empty()) {
+        QMessageBox::information(this, "Info", "Belum ada lagu yang diputar.");
+        return;
+    }
+
+    QString dirPath = QFileDialog::getExistingDirectory(this, "Pilih Folder Untuk Menyimpan Laporan");
+    if (dirPath.isEmpty()) return;
+
+    QVector<QString> sortedKeys;
+    for (const auto &pair : playCountMap) {
+        sortedKeys.append(pair.first);
+    }
+
+    std::sort(sortedKeys.begin(), sortedKeys.end(), [=](const QString &a, const QString &b) {
+        return playCountMap[b] < playCountMap[a]; // descending
+    });
+
+    // === CSV ===
+    QFile csvFile(dirPath + "/laporan_pemutaran.csv");
+    if (csvFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&csvFile);
+        out << "Peringkat,Judul Lagu,Jumlah Diputar,Total Durasi,Terakhir Diputar\n";
+        for (int i = 0; i < sortedKeys.size(); ++i) {
+            QString judul = sortedKeys[i];
+            int playCount = playCountMap[judul];
+            qint64 dur = playDurationMap[judul];
+            QDateTime lastPlayed = lastPlayedMap[judul];
+
+            QTime timeDur = QTime(0, 0).addMSecs(dur);
+            QString durStr = timeDur.toString("hh:mm:ss");
+
+            out << i + 1 << ",\"" << judul << "\"," << playCount << "," << durStr << "," << lastPlayed.toString("dd-MM-yyyy hh:mm") << "\n";
+        }
+        csvFile.close();
+    }
+
+    // === TXT ===
+    QFile txtFile(dirPath + "/laporan_pemutaran.txt");
+    if (txtFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&txtFile);
+        out << "📊 Laporan Statistik Lagu Diputar\n";
+        out << "Tanggal Dibuat: " << QDate::currentDate().toString("dd MMMM yyyy") << "\n\n";
+        out << "Berikut adalah daftar lagu yang paling sering diputar:\n\n";
+
+        for (int i = 0; i < sortedKeys.size(); ++i) {
+            QString judul = sortedKeys[i];
+            int count = playCountMap[judul];
+            qint64 dur = playDurationMap[judul];
+            QDateTime lastPlayed = lastPlayedMap[judul];
+
+            QTime timeDur = QTime(0, 0).addMSecs(dur);
+            QString durStr = timeDur.toString("hh:mm:ss");
+            QString lastPlayedStr = lastPlayed.toString("dd-MM-yyyy hh:mm");
+
+            QString dots = QString(30 - judul.length(), '.');
+            out << i + 1 << ". " << judul << " " << dots << " " << count << " kali\n";
+            out << "    Total durasi didengar: " << durStr << "\n";
+            out << "    Terakhir diputar     : " << lastPlayedStr << "\n\n";
+        }
+
+        out << "Terima kasih telah menggunakan MusicPlayer!\n";
+        txtFile.close();
+    }
+
+    QMessageBox::information(this, "Sukses", "Laporan berhasil disimpan dalam format CSV dan TXT!");
+}
+
+void MainWindow::catatDurasiDengar()
+{
+    if (judulLaguDiputar.isEmpty()) return;
+
+    qint64 durasi = waktuMulaiDiputar.msecsTo(QDateTime::currentDateTime());
+    playDurationMap[judulLaguDiputar] += durasi;
+    lastPlayedMap[judulLaguDiputar] = QDateTime::currentDateTime();
+
+    // Reset
+    judulLaguDiputar.clear();
+    waktuMulaiDiputar = QDateTime();
+}
+
+
 
