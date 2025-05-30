@@ -34,11 +34,24 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    connect(MPlayer, &QMediaPlayer::playbackStateChanged, this, [this](QMediaPlayer::PlaybackState state) {
+        if (state == QMediaPlayer::PlayingState) {
+            ui->pushButton_Play->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+            ui->pushButton_Play->setToolTip("Pause");
+        } else {
+            ui->pushButton_Play->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+            ui->pushButton_Play->setToolTip("Play");
+        }
+    });
+
+
     // Inisialisasi QMediaPlayer dan QAudioOutput
     MPlayer = new QMediaPlayer(this);
     audioOutput = new QAudioOutput(this);
     MPlayer->setAudioOutput(audioOutput);
     audioOutput->setVolume(0.5);
+
+    connect(MPlayer, &QMediaPlayer::playbackStateChanged, this, &MainWindow::updatePlayPauseIcon);
 
     // Koneksi untuk update lirik (menggunakan lyricsTimer yang sudah ada)
     lyricsTimer = new QTimer(this);
@@ -79,7 +92,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->previousButton->setToolTip("Previous");
     ui->pushButton_Stop->setToolTip("Reset");
     ui->pushButton_Play->setToolTip("Play");
-    ui->pushButton_Pause->setToolTip("Pause");
     ui->nextButton->setToolTip("Next");
     ui->setTimerButton->setToolTip("Sleep Timer");
     ui->pushButton_KembaliKeLirik->setToolTip("Lirik");
@@ -93,7 +105,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Setup ikon tombol dan volume slider
     ui->pushButton_Play->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-    ui->pushButton_Pause->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
     ui->pushButton_Stop->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
     ui->nextButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipForward));
     ui->previousButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipBackward));
@@ -261,26 +272,18 @@ void MainWindow::on_actionOpen_Audio_File_triggered()
 
 void MainWindow::on_pushButton_Play_clicked()
 {
-    if (MPlayer->playbackState() == QMediaPlayer::PausedState) {
-        MPlayer->play(); // Lanjut dari posisi terakhir
-    } else if (MPlayer->playbackState() != QMediaPlayer::PlayingState) {
-        if (MPlayer->mediaStatus() == QMediaPlayer::EndOfMedia)
-            MPlayer->setPosition(0); // Ulangi jika sudah selesai
-
-        // Jika tidak ada lagu yang dipilih tapi daftar lagu ada, putar yang pertama
+    if (MPlayer->playbackState() == QMediaPlayer::PlayingState) {
+        MPlayer->pause();
+    } else {
         if (MPlayer->mediaStatus() == QMediaPlayer::NoMedia && !daftarLagu.isEmpty()) {
             putarLaguPadaIndeks(0);
         } else {
             MPlayer->play();
         }
     }
-}
 
-void MainWindow::on_pushButton_Pause_clicked()
-{
-    if (MPlayer->playbackState() == QMediaPlayer::PlayingState) {
-        MPlayer->pause();
-    }
+    // Paksa update ikon
+    updatePlayPauseIcon();
 }
 
 
@@ -1197,3 +1200,15 @@ void MainWindow::catatDurasiDengar()
     judulLaguDiputar.clear();
     waktuMulaiDiputar = QDateTime();
 }
+
+void MainWindow::updatePlayPauseIcon()
+{
+    if (MPlayer->playbackState() == QMediaPlayer::PlayingState) {
+        ui->pushButton_Play->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+        ui->pushButton_Play->setToolTip("Pause");
+    } else {
+        ui->pushButton_Play->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+        ui->pushButton_Play->setToolTip("Play");
+    }
+}
+
