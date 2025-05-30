@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>633</width>
+    <width>511</width>
     <height>606</height>
    </rect>
   </property>
@@ -23,7 +23,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>481</width>
+      <width>511</width>
       <height>51</height>
      </rect>
     </property>
@@ -47,9 +47,9 @@
    <widget class="QSlider" name="horizontalSlider_Audio_File_Duration">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>10</x>
       <y>70</y>
-      <width>491</width>
+      <width>500</width>
       <height>22</height>
      </rect>
     </property>
@@ -77,9 +77,9 @@ border-radius:10px;
    <widget class="QSlider" name="horizontalSlider_Audio_Volume">
     <property name="geometry">
      <rect>
-      <x>60</x>
+      <x>70</x>
       <y>240</y>
-      <width>421</width>
+      <width>411</width>
       <height>22</height>
      </rect>
     </property>
@@ -107,7 +107,7 @@ border-radius:10px;
    <widget class="QPushButton" name="pushButton_Volume">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>20</x>
       <y>230</y>
       <width>40</width>
       <height>40</height>
@@ -136,13 +136,16 @@ padding:0px;
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>30</x>
       <y>130</y>
-      <width>451</width>
+      <width>462</width>
       <height>82</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>15</number>
+     </property>
      <item>
       <widget class="QPushButton" name="previousButton">
        <property name="styleSheet">
@@ -303,7 +306,7 @@ QPushButton::Hover
    <widget class="QLabel" name="label_Value_1">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>30</x>
       <y>100</y>
       <width>60</width>
       <height>16</height>
@@ -332,7 +335,7 @@ QPushButton::Hover
    <widget class="QLabel" name="label_Value_2">
     <property name="geometry">
      <rect>
-      <x>410</x>
+      <x>430</x>
       <y>100</y>
       <width>60</width>
       <height>16</height>
@@ -361,7 +364,7 @@ QPushButton::Hover
    <widget class="QPushButton" name="setTimerButton">
     <property name="geometry">
      <rect>
-      <x>200</x>
+      <x>195</x>
       <y>280</y>
       <width>23</width>
       <height>25</height>
@@ -393,7 +396,7 @@ QPushButton::Hover
    <widget class="QSpinBox" name="timerSpinBox">
     <property name="geometry">
      <rect>
-      <x>150</x>
+      <x>145</x>
       <y>280</y>
       <width>51</width>
       <height>25</height>
@@ -575,9 +578,9 @@ QPushButton::Hover
    <widget class="QPushButton" name="pushButton_Shuffle">
     <property name="geometry">
      <rect>
-      <x>380</x>
+      <x>410</x>
       <y>280</y>
-      <width>40</width>
+      <width>35</width>
       <height>25</height>
      </rect>
     </property>
@@ -601,9 +604,9 @@ padding:0px;
    <widget class="QPushButton" name="pushButton_Repeat">
     <property name="geometry">
      <rect>
-      <x>430</x>
+      <x>455</x>
       <y>280</y>
-      <width>40</width>
+      <width>35</width>
       <height>25</height>
      </rect>
     </property>
@@ -653,9 +656,9 @@ padding:3px;
    <widget class="QPushButton" name="pushButton_DaftarLagu">
     <property name="geometry">
      <rect>
-      <x>330</x>
+      <x>365</x>
       <y>280</y>
-      <width>40</width>
+      <width>35</width>
       <height>25</height>
      </rect>
     </property>
@@ -680,9 +683,9 @@ QPushButton::Hover
    <widget class="QPushButton" name="pushButton_KembaliKeLirik">
     <property name="geometry">
      <rect>
-      <x>280</x>
+      <x>320</x>
       <y>280</y>
-      <width>40</width>
+      <width>35</width>
       <height>25</height>
      </rect>
     </property>
@@ -709,7 +712,7 @@ QPushButton::Hover
      <rect>
       <x>20</x>
       <y>320</y>
-      <width>441</width>
+      <width>471</width>
       <height>241</height>
      </rect>
     </property>
@@ -729,7 +732,7 @@ QPushButton::Hover
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>421</width>
+        <width>451</width>
         <height>221</height>
        </rect>
       </property>
@@ -859,7 +862,7 @@ QPushButton::Hover
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>421</width>
+        <width>451</width>
         <height>221</height>
        </rect>
       </property>
@@ -1004,7 +1007,7 @@ QPushButton::Hover
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>421</width>
+        <width>451</width>
         <height>221</height>
        </rect>
       </property>
@@ -1149,7 +1152,7 @@ QPushButton::Hover
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>421</width>
+        <width>451</width>
         <height>221</height>
        </rect>
       </property>
@@ -1166,9 +1169,9 @@ QPushButton::Hover
    <widget class="QPushButton" name="pushButton_ListWidgetQueue">
     <property name="geometry">
      <rect>
-      <x>230</x>
+      <x>275</x>
       <y>280</y>
-      <width>40</width>
+      <width>35</width>
       <height>25</height>
      </rect>
     </property>
@@ -1193,14 +1196,24 @@ QPushButton::Hover
    <widget class="QPushButton" name="pushButton_DownloadReport">
     <property name="geometry">
      <rect>
-      <x>490</x>
-      <y>10</y>
-      <width>131</width>
-      <height>24</height>
+      <x>230</x>
+      <y>280</y>
+      <width>35</width>
+      <height>25</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton
+{
+border:none;
+border-radius:10px;
+background-color:rgb(255,255,255);
+color:rgb(52,51,64);
+padding:0px;
+}</string>
+    </property>
     <property name="text">
-     <string>Musicplayer wrapped</string>
+     <string/>
     </property>
    </widget>
    <zorder>layoutWidget</zorder>
@@ -1226,8 +1239,8 @@ QPushButton::Hover
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>633</width>
-     <height>22</height>
+     <width>511</width>
+     <height>23</height>
     </rect>
    </property>
    <property name="palette">
@@ -1363,6 +1376,160 @@ QPushButton::Hover
     </font>
    </property>
    <widget class="QMenu" name="menuOpen">
+    <property name="palette">
+     <palette>
+      <active>
+       <colorrole role="Button">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>52</red>
+          <green>51</green>
+          <blue>64</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="Text">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="ButtonText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="Base">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>52</red>
+          <green>51</green>
+          <blue>64</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="Window">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>52</red>
+          <green>51</green>
+          <blue>64</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="HighlightedText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>26</red>
+          <green>49</green>
+          <blue>255</blue>
+         </color>
+        </brush>
+       </colorrole>
+      </active>
+      <inactive>
+       <colorrole role="Button">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>52</red>
+          <green>51</green>
+          <blue>64</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="Text">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="ButtonText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="Base">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>52</red>
+          <green>51</green>
+          <blue>64</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="Window">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>52</red>
+          <green>51</green>
+          <blue>64</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="HighlightedText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>26</red>
+          <green>49</green>
+          <blue>255</blue>
+         </color>
+        </brush>
+       </colorrole>
+      </inactive>
+      <disabled>
+       <colorrole role="Button">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>52</red>
+          <green>51</green>
+          <blue>64</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="Base">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>52</red>
+          <green>51</green>
+          <blue>64</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="Window">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>52</red>
+          <green>51</green>
+          <blue>64</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="HighlightedText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>26</red>
+          <green>49</green>
+          <blue>255</blue>
+         </color>
+        </brush>
+       </colorrole>
+      </disabled>
+     </palette>
+    </property>
     <property name="title">
      <string>Open</string>
     </property>
