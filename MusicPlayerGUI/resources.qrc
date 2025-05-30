@@ -5,5 +5,7 @@
         <file>icon/timer.svg</file>
         <file>icon/lyric.svg</file>
         <file>icon/playlist.svg</file>
+        <file>icon/queue.svg</file>
+        <file>icon/history.svg</file>
     </qresource>
 </RCC>
