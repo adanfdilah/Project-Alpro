@@ -90,7 +90,6 @@ MainWindow::MainWindow(QWidget *parent)
                             "}");
     // tool tip keterengan
     ui->previousButton->setToolTip("Previous");
-    ui->pushButton_Stop->setToolTip("Reset");
     ui->pushButton_Play->setToolTip("Play");
     ui->nextButton->setToolTip("Next");
     ui->setTimerButton->setToolTip("Sleep Timer");
@@ -105,7 +104,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Setup ikon tombol dan volume slider
     ui->pushButton_Play->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-    ui->pushButton_Stop->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
     ui->nextButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipForward));
     ui->previousButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipBackward));
     ui->pushButton_Volume->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
@@ -284,20 +282,6 @@ void MainWindow::on_pushButton_Play_clicked()
 
     // Paksa update ikon
     updatePlayPauseIcon();
-}
-
-
-
-void MainWindow::on_pushButton_Stop_clicked()
-{
-    catatDurasiDengar();
-    MPlayer->stop();
-    // Berhenti menampilkan lirik juga
-    lyricsTimer->stop();
-    ui->lyricsDisplay->setPlainText("");
-    ui->label_File_Name->setText("Tidak ada lagu diputar");
-    ui->horizontalSlider_Audio_File_Duration->setValue(0);
-    updateduration(0);
 }
 
 
