@@ -48,7 +48,7 @@ protected:
 
 private slots:
     void on_pushButton_Play_clicked();
-    void on_pushButton_Pause_clicked();
+    void on_playPauseButton_clicked();
     void on_pushButton_Stop_clicked();
     void on_nextButton_clicked();
     void on_previousButton_clicked();
@@ -135,6 +135,7 @@ private: // Fungsi-fungsi helper dan member variables
     void clearQueue();
     void on_listWidget_Queue_itemClicked(QListWidgetItem *item);
     void catatDurasiDengar();
+    void updatePlayPauseIcon();
 
 };
 
