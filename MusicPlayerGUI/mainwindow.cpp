@@ -88,6 +88,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_Repeat->setToolTip("Repeat");
     ui->pushButton_Volume->setToolTip("Sound");
     ui->pushButton_ListWidgetQueue->setToolTip("Antrian");
+    ui->pushButton_DownloadReport->setToolTip("History");
 
 
     // Setup ikon tombol dan volume slider
@@ -103,6 +104,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_DaftarLagu->setIcon(QIcon(":/new/icon/playlist.svg"));
     ui->setTimerButton->setIcon(QIcon(":/new/icon/timer.svg"));
     ui->pushButton_ListWidgetQueue->setIcon(QIcon(":/new/icon/queue.svg"));
+    ui->pushButton_DownloadReport->setIcon(QIcon(":/new/icon/history.svg"));
 
     // Inisialisasi QNetworkAccessManager untuk fetch lirik
     networkManager = new QNetworkAccessManager(this);
@@ -416,7 +418,8 @@ void MainWindow::handleTimerTimeout()
 {
     if (MPlayer->playbackState() == QMediaPlayer::PlayingState) {
         MPlayer->pause(); // Bisa juga pakai stop()
-        QMessageBox::information(this, "Timer", "Musik dihentikan otomatis.");
+        QString htmlText = QString("<b><font color='white'>Musik dihentikan otomatis.</font></b>");
+        QMessageBox::information(this, "Timer", htmlText);
     }
 }
 
@@ -428,9 +431,11 @@ void MainWindow::on_setTimerButton_clicked()
 
     if (minutes > 0) {
         stopTimer->start(minutes * 60 * 1000); // Konversi menit ke milidetik
-        QMessageBox::information(this, "Timer", QString("Musik akan berhenti dalam %1 menit.").arg(minutes));
+        QString htmlText = QString("<b><font color='white'>Musik akan berhenti dalam %1 menit.</font></b>").arg(minutes);
+        QMessageBox::information(this, "Timer", htmlText);
     } else {
-        QMessageBox::warning(this, "Timer", "Masukkan waktu lebih dari 0 menit.");
+        QString htmlText = QString("<b><font color='white'>Masukkan waktu lebih dari 0 menit.</font>.</b>");
+        QMessageBox::warning(this, "Timer", htmlText);
     }
 }
 
@@ -442,6 +447,9 @@ void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
     QString path = daftarLagu[index];
 
     QMenu menu(this);
+    menu.setStyleSheet("QMenu::item { font: 10pt 'Segoe UI'; color: white; padding: 6px; }"
+                       "QMenu { background-color: #2a2a2a; border: 1px solid white; }"
+                       "QMenu::item:selected { background-color: #444; }");
     QAction *putarLangsung = menu.addAction("Putar Sekarang");
     QAction *tambahkanKeQueueAct = menu.addAction("Tambahkan ke Queue");
 
@@ -451,7 +459,8 @@ void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
         putarLaguPadaIndeks(index);
     } else if (chosen == tambahkanKeQueueAct) {
         tambahkanKeQueue(path);
-        QMessageBox::information(this, "Queue", "Lagu telah ditambahkan ke antrian.");
+        QString htmlText = QString("<b><font color='white'>Lagu telah ditambahkan ke antrian.</font>.</b>");
+        QMessageBox::warning(this, "Queue", htmlText);
     }
 }
 
@@ -1029,7 +1038,8 @@ void MainWindow::clearQueue()
 {
     laguQueue.clear();
     perbaruiTampilanQueue();
-    QMessageBox::information(this, "Queue", "Antrian lagu telah dikosongkan.");
+    QString htmlText = QString("<b><font color='white'>Antrian lagu telah dikosongkan.</font>.</b>");
+    QMessageBox::warning(this, "Queue", htmlText);
 }
 
 void MainWindow::on_listWidget_Queue_itemClicked(QListWidgetItem *item)
@@ -1048,6 +1058,9 @@ void MainWindow::on_listWidget_Queue_itemClicked(QListWidgetItem *item)
     if (pathToRemove.isEmpty()) return;
 
     QMenu menu(this);
+    menu.setStyleSheet("QMenu::item { font: 10pt 'Segoe UI'; color: white; padding: 6px; }"
+                       "QMenu { background-color: #2a2a2a; border: 1px solid white; }"
+                       "QMenu::item:selected { background-color: #444; }");
     QAction *hapus = menu.addAction("Hapus dari Queue");
     QAction *clearAll = menu.addAction("Kosongkan Semua");
 
@@ -1104,7 +1117,9 @@ void MainWindow::updateDaftarLaguSetelahDrag() {
 void MainWindow::on_pushButton_DownloadReport_clicked()
 {
     if (playCountMap.empty()) {
-        QMessageBox::information(this, "Info", "Belum ada lagu yang diputar.");
+        QString htmlText = QString("<b><font color='white'>Belum ada lagu yang diputar.</font>.</b>");
+        QMessageBox::warning(this, "Info", htmlText);
+
         return;
     }
 
@@ -1182,6 +1197,3 @@ void MainWindow::catatDurasiDengar()
     judulLaguDiputar.clear();
     waktuMulaiDiputar = QDateTime();
 }
-
-
-
