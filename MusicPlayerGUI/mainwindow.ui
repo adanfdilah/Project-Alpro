@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>511</width>
+    <width>584</width>
     <height>606</height>
    </rect>
   </property>
@@ -1154,6 +1154,25 @@ padding:0px;
      <string/>
     </property>
    </widget>
+   <widget class="QToolButton" name="toolButton_Menu">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>240</y>
+      <width>23</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Menu</string>
+    </property>
+    <property name="text">
+     <string>≡</string>
+    </property>
+    <property name="popupMode">
+     <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
+    </property>
+   </widget>
    <zorder>layoutWidget</zorder>
    <zorder>label_File_Name</zorder>
    <zorder>horizontalSlider_Audio_File_Duration</zorder>
@@ -1171,13 +1190,14 @@ padding:0px;
    <zorder>stackedView</zorder>
    <zorder>pushButton_ListWidgetQueue</zorder>
    <zorder>pushButton_DownloadReport</zorder>
+   <zorder>toolButton_Menu</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>511</width>
+     <width>584</width>
      <height>22</height>
     </rect>
    </property>

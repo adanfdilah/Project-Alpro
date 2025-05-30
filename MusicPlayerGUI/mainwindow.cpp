@@ -34,6 +34,17 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    QMenu *menu = new QMenu(this);
+
+    // Tambahkan item menu
+    menu->addAction(QIcon(":/new/icon/playlist.svg"), "Playlist", this, &MainWindow::on_pushButton_DaftarLagu_clicked);
+    menu->addAction(QIcon(":/new/icon/lyric.svg"), "Lirik", this, &MainWindow::on_pushButton_KembaliKeLirik_clicked);
+    menu->addAction(QIcon(":/new/icon/queue.svg"), "Antrian Saya", this, &MainWindow::on_pushButton_ListWidgetQueue_clicked);
+    menu->addAction(QIcon(":/new/icon/history.svg"), "Download Laporan", this, &MainWindow::on_pushButton_DownloadReport_clicked);
+
+    // Atur menu ke tool button
+    ui->toolButton_Menu->setMenu(menu);
+
     connect(MPlayer, &QMediaPlayer::playbackStateChanged, this, [this](QMediaPlayer::PlaybackState state) {
         if (state == QMediaPlayer::PlayingState) {
             ui->pushButton_Play->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
@@ -114,6 +125,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setTimerButton->setIcon(QIcon(":/new/icon/timer.svg"));
     ui->pushButton_ListWidgetQueue->setIcon(QIcon(":/new/icon/queue.svg"));
     ui->pushButton_DownloadReport->setIcon(QIcon(":/new/icon/history.svg"));
+    ui->toolButton_Menu->setStyleSheet("QToolButton::menu-indicator { image: none; }");
+
 
     // Inisialisasi QNetworkAccessManager untuk fetch lirik
     networkManager = new QNetworkAccessManager(this);
@@ -177,6 +190,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->listWidget->installEventFilter(this);
 
+    ui->pushButton_DaftarLagu->hide();
+    ui->pushButton_KembaliKeLirik->hide();
+    ui->pushButton_DownloadReport->hide();
+    ui->pushButton_ListWidgetQueue->hide();
 
 }
 
