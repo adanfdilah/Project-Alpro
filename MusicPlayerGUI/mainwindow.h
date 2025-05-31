@@ -48,7 +48,6 @@ protected:
 
 private slots:
     void on_pushButton_Play_clicked();
-    void on_playPauseButton_clicked();
     void on_nextButton_clicked();
     void on_previousButton_clicked();
     void on_pushButton_Volume_clicked();

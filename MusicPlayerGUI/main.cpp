@@ -6,18 +6,15 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-
-    QTranslator translator;
-    const QStringList uiLanguages = QLocale::system().uiLanguages();
-    for (const QString &locale : uiLanguages) {
-        const QString baseName = "MusicPlayerGUI_" + QLocale(locale).name();
-        if (translator.load(":/i18n/" + baseName)) {
-            a.installTranslator(&translator);
-            break;
-        }
+    try {
+        QApplication a(argc, argv);
+        MainWindow w;
+        w.show();
+        return a.exec();
+    } catch (const std::exception &e) {
+        QMessageBox::critical(nullptr, "Exception", e.what());
+    } catch (...) {
+        QMessageBox::critical(nullptr, "Unknown Error", "Terjadi kesalahan tidak dikenal.");
     }
-    MainWindow w;
-    w.show();
-    return a.exec();
+    return -1;
 }
