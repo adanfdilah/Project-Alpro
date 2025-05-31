@@ -7,5 +7,10 @@
         <file>icon/playlist.svg</file>
         <file>icon/queue.svg</file>
         <file>icon/history.svg</file>
+        <file>icon/menu.svg</file>
+        <file>icon/history_white.svg</file>
+        <file>icon/lyric_white.svg</file>
+        <file>icon/playlist_white.svg</file>
+        <file>icon/queue_white.svg</file>
     </qresource>
 </RCC>
