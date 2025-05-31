@@ -36,11 +36,31 @@ MainWindow::MainWindow(QWidget *parent)
 
     QMenu *menu = new QMenu(this);
 
+    // mengatur style dari menu
+    menu->setStyleSheet(
+        "QMenu {"
+        "  background-color: #2a2a2a;"          // warna latar menu
+        "  border: 1px solid white;"            // border menu
+        "  padding: 5px;"
+        "}"
+
+        "QMenu::item {"
+        "  color: white;"                       // warna teks
+        "  padding: 6px 5px;"                  // jarak isi item
+        "  font: 10pt 'Segoe UI';"
+        "}"
+
+        "QMenu::item:selected {"                // efek hover/terpilih
+        "  background-color: #444;"
+        "  color: yellow;"
+        "}"
+        );
+
     // Tambahkan item menu
-    menu->addAction(QIcon(":/new/icon/playlist.svg"), "Playlist", this, &MainWindow::on_pushButton_DaftarLagu_clicked);
-    menu->addAction(QIcon(":/new/icon/lyric.svg"), "Lirik", this, &MainWindow::on_pushButton_KembaliKeLirik_clicked);
-    menu->addAction(QIcon(":/new/icon/queue.svg"), "Antrian Saya", this, &MainWindow::on_pushButton_ListWidgetQueue_clicked);
-    menu->addAction(QIcon(":/new/icon/history.svg"), "Download Laporan", this, &MainWindow::on_pushButton_DownloadReport_clicked);
+    menu->addAction(QIcon(":/new/icon/playlist_white.svg"), "Playlist", this, &MainWindow::on_pushButton_DaftarLagu_clicked);
+    menu->addAction(QIcon(":/new/icon/lyric_white.svg"), "Lirik", this, &MainWindow::on_pushButton_KembaliKeLirik_clicked);
+    menu->addAction(QIcon(":/new/icon/queue_white.svg"), "Antrian Saya", this, &MainWindow::on_pushButton_ListWidgetQueue_clicked);
+    menu->addAction(QIcon(":/new/icon/history_white.svg"), "Download Laporan", this, &MainWindow::on_pushButton_DownloadReport_clicked);
 
     // Atur menu ke tool button
     ui->toolButton_Menu->setMenu(menu);
@@ -104,28 +124,20 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_Play->setToolTip("Play");
     ui->nextButton->setToolTip("Next");
     ui->setTimerButton->setToolTip("Sleep Timer");
-    ui->pushButton_KembaliKeLirik->setToolTip("Lirik");
-    ui->pushButton_DaftarLagu->setToolTip("Playlist");
     ui->pushButton_Shuffle->setToolTip("Shuffle");
     ui->pushButton_Repeat->setToolTip("Repeat");
     ui->pushButton_Volume->setToolTip("Sound");
-    ui->pushButton_ListWidgetQueue->setToolTip("Antrian");
-    ui->pushButton_DownloadReport->setToolTip("History");
 
 
-    // Setup ikon tombol dan volume slider
+    // Setup ikon tombol
     ui->pushButton_Play->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     ui->nextButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipForward));
     ui->previousButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipBackward));
     ui->pushButton_Volume->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
     ui->pushButton_Shuffle->setIcon(QIcon(":/new/icon/shuffle.svg"));
     ui->pushButton_Repeat->setIcon(QIcon(":/new/icon/repeat.svg"));
-    ui->pushButton_KembaliKeLirik->setIcon(QIcon(":/new/icon/lyric.svg"));
-    ui->pushButton_DaftarLagu->setIcon(QIcon(":/new/icon/playlist.svg"));
     ui->setTimerButton->setIcon(QIcon(":/new/icon/timer.svg"));
-    ui->pushButton_ListWidgetQueue->setIcon(QIcon(":/new/icon/queue.svg"));
-    ui->pushButton_DownloadReport->setIcon(QIcon(":/new/icon/history.svg"));
-    ui->toolButton_Menu->setStyleSheet("QToolButton::menu-indicator { image: none; }");
+    ui->toolButton_Menu->setIcon(QIcon(":/new/icon/menu.svg"));
 
 
     // Inisialisasi QNetworkAccessManager untuk fetch lirik
