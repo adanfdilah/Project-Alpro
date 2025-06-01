@@ -33,6 +33,13 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    // Inisialisasi QMediaPlayer dan QAudioOutput
+    MPlayer = new QMediaPlayer(this);
+    audioOutput = new QAudioOutput(this);
+    MPlayer->setAudioOutput(audioOutput);
+    audioOutput->setVolume(0.5);
+
+    connect(MPlayer, &QMediaPlayer::playbackStateChanged, this, &MainWindow::updatePlayPauseIcon);
 
     QMenu *menu = new QMenu(this);
 
@@ -65,24 +72,6 @@ MainWindow::MainWindow(QWidget *parent)
     // Atur menu ke tool button
     ui->toolButton_Menu->setMenu(menu);
 
-    connect(MPlayer, &QMediaPlayer::playbackStateChanged, this, [this](QMediaPlayer::PlaybackState state) {
-        if (state == QMediaPlayer::PlayingState) {
-            ui->pushButton_Play->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
-            ui->pushButton_Play->setToolTip("Pause");
-        } else {
-            ui->pushButton_Play->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-            ui->pushButton_Play->setToolTip("Play");
-        }
-    });
-
-
-    // Inisialisasi QMediaPlayer dan QAudioOutput
-    MPlayer = new QMediaPlayer(this);
-    audioOutput = new QAudioOutput(this);
-    MPlayer->setAudioOutput(audioOutput);
-    audioOutput->setVolume(0.5);
-
-    connect(MPlayer, &QMediaPlayer::playbackStateChanged, this, &MainWindow::updatePlayPauseIcon);
 
     // Koneksi untuk update lirik (menggunakan lyricsTimer yang sudah ada)
     lyricsTimer = new QTimer(this);
@@ -206,6 +195,22 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_KembaliKeLirik->hide();
     ui->pushButton_DownloadReport->hide();
     ui->pushButton_ListWidgetQueue->hide();
+
+    ui->pushButton_Shuffle->setCheckable(true);
+    ui->pushButton_Repeat->setCheckable(true);
+
+    // menghilangkan icon segitiga ke bawah di hamburger menu
+    ui->toolButton_Menu->setStyleSheet(R"(
+    QToolButton {
+        background-color: #ffffff;
+        border: 1px solid #cccccc;
+        padding: 5px;
+        border-radius: 4px;
+    }
+    QToolButton::menu-indicator {
+        image: none;
+    }
+    )");
 
 }
 
@@ -556,20 +561,27 @@ void MainWindow::on_pushButton_Shuffle_toggled(bool checked)
 {
     isShuffle = checked;
     if (isShuffle) {
-        ui->pushButton_Shuffle->setStyleSheet("background-color: #FFA500; color: white;"); // Contoh highlight orange
+        ui->pushButton_Shuffle->setStyleSheet(
+            "QPushButton { background-color: #FFA500; color: white; }"
+            );
     } else {
-        ui->pushButton_Shuffle->setStyleSheet(""); // Reset style
+        ui->pushButton_Shuffle->setStyleSheet(
+            "QPushButton { background-color: white; color: black; }"
+            );
     }
 }
 
 void MainWindow::on_pushButton_Repeat_toggled(bool checked)
 {
     isRepeat = checked;
-
-    if (checked) {
-        ui->pushButton_Repeat->setStyleSheet("background-color: #00cc66; color: white;");
+    if (isRepeat) {
+        ui->pushButton_Repeat->setStyleSheet(
+            "QPushButton { background-color: #00cc66; color: white; }"
+            );
     } else {
-        ui->pushButton_Repeat->setStyleSheet("");
+        ui->pushButton_Repeat->setStyleSheet(
+            "QPushButton { background-color: white; color: black; }"
+            );
     }
 }
 
