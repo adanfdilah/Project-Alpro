@@ -736,11 +736,8 @@ QPushButton::Hover
     <property name="styleSheet">
      <string notr="true">QPushButton
 {
-border:none;
-border-radius:10px;
 background-color:rgb(255,255,255);
 color:rgb(52,51,64);
-padding:0px;
 }</string>
     </property>
     <property name="text">
@@ -771,11 +768,8 @@ padding:0px;
     <property name="styleSheet">
      <string notr="true">QPushButton
 {
-border:none;
-border-radius:10px;
 background-color:rgb(255,255,255);
 color:rgb(52,51,64);
-padding:0px;
 }</string>
     </property>
     <property name="text">
