@@ -1237,3 +1237,18 @@ void MainWindow::updatePlayPauseIcon()
     }
 }
 
+void MainWindow::openAudioFileFromArg(const QString &path)
+{
+    QMessageBox::information(this, "Debug", "openAudioFileFromArg dipanggil dengan path:\n" + path);
+    if (!daftarLagu.contains(path)) {
+        daftarLagu.append(path);
+        urutkanDaftarLagu(); // Update tampilan
+    }
+
+    int index = daftarLagu.indexOf(path);
+    if (index != -1) {
+        putarLaguPadaIndeks(index);
+    }
+}
+
+

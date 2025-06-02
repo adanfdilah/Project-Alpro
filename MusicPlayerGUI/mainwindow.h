@@ -40,6 +40,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void openAudioFileFromArg(const QString &path);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
