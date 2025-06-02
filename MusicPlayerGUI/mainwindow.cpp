@@ -1206,11 +1206,12 @@ void MainWindow::on_pushButton_DownloadReport_clicked()
             out << "    Terakhir diputar     : " << lastPlayedStr << "\n\n";
         }
 
-        out << "Terima kasih telah menggunakan MusicPlayer!\n";
+        out << "Terima kasih telah menggunakan Audiophile!\n";
         txtFile.close();
     }
 
-    QMessageBox::information(this, "Sukses", "Laporan berhasil disimpan dalam format CSV dan TXT!");
+    QString htmlText = QString("<b><font color='white'>Laporan berhasil disimpan dalam format CSV dan TXT!</font></b>");
+    QMessageBox::information(this, "Sukses", htmlText);
 }
 
 void MainWindow::catatDurasiDengar()
@@ -1250,5 +1251,3 @@ void MainWindow::openAudioFileFromArg(const QString &path)
         putarLaguPadaIndeks(index);
     }
 }
-
-
