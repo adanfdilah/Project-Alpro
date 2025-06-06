@@ -64,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
         );
 
     // Tambahkan item menu
-    menu->addAction(QIcon(":/new/icon/playlist_white.svg"), "Playlist", this, &MainWindow::on_pushButton_DaftarLagu_clicked);
+    menu->addAction(QIcon(":/new/icon/playlist_white.svg"), "Daftar Lagu", this, &MainWindow::on_pushButton_DaftarLagu_clicked);
     menu->addAction(QIcon(":/new/icon/lyric_white.svg"), "Lirik", this, &MainWindow::on_pushButton_KembaliKeLirik_clicked);
     menu->addAction(QIcon(":/new/icon/queue_white.svg"), "Antrian Saya", this, &MainWindow::on_pushButton_ListWidgetQueue_clicked);
     menu->addAction(QIcon(":/new/icon/history_white.svg"), "Download Laporan", this, &MainWindow::on_pushButton_DownloadReport_clicked);
